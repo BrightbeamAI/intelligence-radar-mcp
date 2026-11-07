@@ -1,6 +1,6 @@
-// Contributions to The Intelligence Radar from the assistant (community/SPEC.md section 8). Contributors prepare, preview
+// Contributions to The Intelligence Radar from the assistant (community/SPEC.md section 8). Anyone can prepare, preview
 // and submit; specialist reviewers and editors review. Everything lands on GitHub, in the public contributions repository,
-// where the review desk checks it against the list of people, applies the review policy and records each event for CHAP.
+// where the review desk checks it against the rules, applies the review policy and records each event for CHAP.
 // The payload rules, the preview, the digests and the issue format come from the shared library in ./contribution.js;
 // the status of a contribution is read from the review desk's own comments with ./desk-state.js.
 import * as z from 'zod/v4';
@@ -342,7 +342,7 @@ async function deskAnswer(gh, n, afterId = 0) {
   }
 }
 const answered = (said) => (said ? ['', 'The review desk answered on the issue:', '', quote(said)]
-  : ['', 'The review desk checks it on GitHub within a minute or so; the answer appears on the issue.']);
+  : ['', 'Within a minute, the review desk (an automated check on GitHub) confirms receipt on the issue and asks the reviewers. The editors and specialist reviewers aim to decide within three working days; each decision appears on the issue with its reason.']);
 
 const notConnected = (gh) => `${gh.problem ? `${gh.problem} ` : ''}This assistant is not connected to a GitHub account.`;
 const howToConnect = (gh) => (gh.clientId
@@ -360,8 +360,8 @@ function githubRoute(gh, payload) {
       : ` Paste the JSON below into the field "${pasteInto}": the contribution is too long to carry in full in the link.`}`,
     '3. Press Submit new issue.', '', link.url, ''];
   if (!link.prepared_included) o.push(json(link.prepared), '');
-  o.push('The review desk checks the issue against the list of people on GitHub: issues from people on it go to review automatically. '
-    + `apply_to_contribute gives the link to apply. ${howToConnect(gh)}`);
+  o.push('Anyone can contribute: once the issue is open, the review desk checks it and sends it to the editors and specialist reviewers. '
+    + howToConnect(gh));
   return reply(gh, o, { route: 'github-link', url: link.url, prepared_included: link.prepared_included, ...(link.prepared ? { prepared: link.prepared } : {}) });
 }
 
@@ -449,7 +449,8 @@ const NEEDS = {
 function connection(gh) {
   if (gh.login) {
     const how = gh.source === 'env' ? 'with RADAR_GITHUB_TOKEN' : 'signed in on this computer';
-    const listed = gh.role ? `on the list of people as ${article(gh.role)}` : 'not on the list of people yet (apply_to_contribute gives the link to apply)';
+    const listed = gh.role ? `on the list of people as ${article(gh.role)}`
+      : 'not on the list of people yet (anyone can contribute; a contributor is listed once a contribution of theirs is approved)';
     const extra = gh.role === 'reviewer' || gh.role === 'editor'
       ? ` As ${article(gh.role)}, you also have review_queue, open_contribution, decide_contribution, edit_contribution${gh.role === 'editor' ? ' and publish_queue' : ''}.` : '';
     return `Connected to GitHub as @${gh.login} (${how}), ${listed}. submit_contribution opens the issue in ${FORMS.repo} from this account.${extra}`;
@@ -463,9 +464,9 @@ function howTo(gh) {
     return `- **${C.config.kinds?.[k]?.name ?? L.kindName(k)}** (kind \`${k}\`). ${form?.description ?? ''} Needs ${NEEDS[k]}. ${policyWords(k)}.`;
   });
   return ['# Contribute to The Intelligence Radar', '',
-    'The people on the list of people (editors, specialist reviewers and contributors) can propose changes to The Intelligence Radar from this conversation. '
+    'Anyone can propose changes to The Intelligence Radar from this conversation. '
       + `Each contribution is a GitHub issue in ${FORMS.repo}, where the review desk checks it, the editors and specialist reviewers decide with their reasons, `
-      + 'and every event is recorded in CHAP.', '',
+      + 'and every event is recorded in CHAP. A contributor joins the list of people once a contribution of theirs is approved, unless they chose not to be credited.', '',
     '## What you can contribute', '', ...kinds, '',
     'A correction can also change the text of a dimension or a sector lens. A review or evidence can also concern another page, named in words.', '',
     '## What reviewers need', '',
@@ -479,11 +480,11 @@ function howTo(gh) {
     '1. prepare_contribution checks the contribution against this edition and returns its preview and a draft_id. It sends nothing.',
     '2. Show the person the preview. Submit only when they say it is right.',
     `3. submit_contribution ${gh.login ? `opens it as a GitHub issue from @${gh.login}` : 'returns a pre-filled GitHub issue for the person to open and submit'}.`,
-    '4. The review desk checks it against the list of people and the rules; then the editors and specialist reviewers decide: approve, edit, ask for changes or decline, each with a reason.',
+    '4. Within a minute, the review desk (an automated check on GitHub) confirms receipt and asks the reviewers. The editors and specialist reviewers aim to decide within three working days: approve, edit, ask for changes or decline, each with a reason.',
     '5. When changes are asked for, prepare the new version and send it with revise_contribution. my_contributions shows the status and the reasons.',
     '6. An editor publishes approved contributions in a later release of The Intelligence Radar, crediting the contributor by name unless they chose otherwise.', '',
     '## This install', '', connection(gh), '',
-    'To join the list of people as a contributor or specialist reviewer, apply_to_contribute gives the link to apply.'];
+    'To review contributions as a specialist reviewer, apply_to_review gives the link to apply.'];
 }
 
 const SIGN = { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true };
@@ -520,7 +521,7 @@ function contributorTools(server, gh, grant) {
         flow = null;
         grant(gh.role);
         return reply(gh, [`Signed in to GitHub as @${gh.login}. ${gh.role ? `On the list of people as ${article(gh.role)}.`
-          : 'This account is not on the list of people yet: apply_to_contribute gives the link to apply.'}`,
+          : 'Anyone can contribute: this account joins the list of people once a contribution from it is approved.'}`,
         ...(gh.role === 'reviewer' || gh.role === 'editor' ? ['The review tools are now available: review_queue, open_contribution, decide_contribution and edit_contribution.'] : [])],
         { connected: true, login: gh.login, role: gh.role });
       }
@@ -607,7 +608,7 @@ function contributorTools(server, gh, grant) {
     const status = statusOf((await api(gh, 'GET', `/repos/${gh.repo}/issues/${issue.number}`)) ?? issue);
     return reply(gh, [`Submitted as ${contributionId(issue.number)}: GitHub issue #${issue.number}, ${issue.html_url}`, ...answered(said), '',
       `It needs ${policyWords(payload.kind).toLowerCase()}. my_contributions with ${contributionId(issue.number)} shows its status and the reviewers' reasons.`,
-      ...(gh.role ? [] : ['', `@${gh.login} is not on the list of people yet, so the issue waits until an editor approves an application: apply_to_contribute gives the link.`])],
+      ...(gh.role ? [] : ['', `Once it is approved, @${gh.login} joins the list of people as a contributor, unless they chose not to be credited.`])],
     { route: 'github-issue', repeated: false, id: contributionId(issue.number), issue: issue.number, url: issue.html_url, status });
   }));
 
@@ -684,10 +685,10 @@ function contributorTools(server, gh, grant) {
     return reply(gh, [`Asked the review desk to withdraw ${contributionId(c.issue.number)} (issue #${c.issue.number}).`, ...answered(said)], { id: contributionId(c.issue.number), desk: said });
   }));
 
-  server.registerTool('apply_to_contribute', {
-    title: 'Apply to contribute',
-    description: 'A pre-filled link to the form for joining the list of people of The Intelligence Radar as a contributor or specialist reviewer. '
-      + 'The application is a public GitHub issue that an editor reviews. Fill in only what the person gives.',
+  server.registerTool('apply_to_review', {
+    title: 'Apply to review',
+    description: 'A pre-filled link to the form for becoming a specialist reviewer (or an editor) of The Intelligence Radar. Contributing needs no application: '
+      + 'anyone can contribute. The application is a public GitHub issue that an editor reviews. Fill in only what the person gives.',
     inputSchema: z.object({
       name: z.string().max(120).optional(),
       affiliation: z.string().max(160).optional().describe('Their organisation, or Independent'),
@@ -705,9 +706,9 @@ function contributorTools(server, gh, grant) {
       if (v && v.trim()) q.set(f.id, v.trim());
     }
     const url = `https://github.com/${FORMS.repo}/issues/new?${q}`;
-    return reply(gh, ['To apply, open this link, check the form, choose a role and the areas you know best, tick the terms and press Submit new issue:', '', url, '',
+    return reply(gh, ['To apply to review, open this link, check the form, choose a role and the areas you know best, tick the terms and press Submit new issue:', '', url, '',
       'The application is a public GitHub issue, so share only what you are happy to publish. An editor reviews it. Once approved, your GitHub account is on the '
-        + 'list of people, and everything you send, on GitHub or from your AI assistant, is checked against it automatically.'],
+        + 'list of people as a specialist reviewer, and the review tools (review_queue, open_contribution, decide_contribution, edit_contribution) work for you.'],
     { url });
   }));
 }

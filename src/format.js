@@ -96,8 +96,9 @@ export function aboutMarkdown() {
     '- `check_plan` matches a plan or roadmap to the entries it touches; `show_radar` draws the radar where the host supports it.',
     ...(sectors.length ? [`- \`get_sector\` reads The Intelligence Radar for one sector (${sectors.map((x) => x.name).join(', ')}): what binds there, where to start and the entries placed differently.`] : []),
     '- When you use the Radar in an answer, name entries by ID and title, give both labels and link the entry page.',
-    '- `how_to_contribute` explains how approved contributors propose a review, a correction, evidence, a label change or a new entry; '
-      + '`prepare_contribution` checks one against this edition and shows its preview before anything is sent.', '',
+    '- Anyone can contribute: `how_to_contribute` explains how to propose a review, a correction, evidence, a label change or a new entry; '
+      + '`prepare_contribution` checks one against this edition and shows its preview before anything is sent, and `submit_contribution` sends it '
+      + 'as a GitHub issue. Specialist reviewers and editors review contributions from here too (`review_queue`, `decide_contribution`).', '',
     `Website: ${ED.site_url}. Text under ${ED.licence}, with credit to ${ED.title}, Brightbeam. Cite as: ${ED.cite}`,
   ];
   return o.join('\n');
