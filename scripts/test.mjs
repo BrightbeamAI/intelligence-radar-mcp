@@ -21,7 +21,7 @@ const textOf = (r) => (r.content || []).filter((c) => c.type === 'text').map((c)
 const same = (a, b) => JSON.stringify([...a].sort()) === JSON.stringify([...b].sort());
 
 const READING = ['about_radar', 'check_plan', 'get_dimension', 'get_entry', 'get_sector', 'get_sources', 'list_dimensions', 'list_judgements', 'search_radar', 'show_radar'];
-const CONTRIBUTOR = ['apply_to_contribute', 'how_to_contribute', 'my_contributions', 'prepare_contribution', 'revise_contribution', 'sign_in_with_github',
+const CONTRIBUTOR = ['apply_to_review', 'how_to_contribute', 'my_contributions', 'prepare_contribution', 'revise_contribution', 'sign_in_with_github',
   'submit_contribution', 'withdraw_contribution'];
 const NO_SIGN_IN = mkdtempSync(path.join(os.tmpdir(), 'radar-mcp-config-')); // an empty configuration folder: no saved sign-in
 const REVIEWER = ['decide_contribution', 'edit_contribution', 'open_contribution', 'review_queue'];
@@ -46,8 +46,8 @@ async function run(label, options) {
   check(t('lists the ten reading tools and, without a GitHub connection, the eight contributor tools'), same(names, [...READING, ...CONTRIBUTOR]), names.join(', '));
   check(t('marks the reading tools read-only'), tools.filter((x) => READING.includes(x.name)).every((x) => x.annotations?.readOnlyHint === true));
   const ann = Object.fromEntries(tools.map((x) => [x.name, x.annotations ?? {}]));
-  check(t('marks how_to_contribute, prepare_contribution, apply_to_contribute and my_contributions read-only'),
-    ['how_to_contribute', 'prepare_contribution', 'apply_to_contribute', 'my_contributions'].every((n) => ann[n]?.readOnlyHint === true));
+  check(t('marks how_to_contribute, prepare_contribution, apply_to_review and my_contributions read-only'),
+    ['how_to_contribute', 'prepare_contribution', 'apply_to_review', 'my_contributions'].every((n) => ann[n]?.readOnlyHint === true));
   check(t('marks submit_contribution and revise_contribution as writes that destroy nothing and reach GitHub; submitting is idempotent'),
     ['submit_contribution', 'revise_contribution'].every((n) => ann[n]?.readOnlyHint === false && ann[n]?.destructiveHint === false && ann[n]?.openWorldHint === true)
     && ann.submit_contribution?.idempotentHint === true);
@@ -291,8 +291,8 @@ async function contributing(client, t) {
     && q.get('template') === 'correction.yml' && q.get('title') === '[Correction] Name the neutral home of Agent Skills' && q.get('entry') === 'IR-028'
     && q.get('current') === FIND && q.get('proposed') === REPL && q.get('disclosure') === 'None'
     && q.get('why') === VALID.correction.summary && prepared && digest(prepared) === drafts.correction.draft_id, link.href.slice(0, 300));
-  check(t('submit_contribution says to check the form and press Submit new issue, and how to apply'),
-    /Submit new issue/.test(textOf(sub)) && /list of people/.test(textOf(sub)) && /apply_to_contribute/.test(textOf(sub)));
+  check(t('submit_contribution says to check the form and press Submit new issue, and that anyone can contribute'),
+    /Submit new issue/.test(textOf(sub)) && /Anyone can contribute/.test(textOf(sub)) && !/apply_to_/.test(textOf(sub)));
   const long = await call('prepare_contribution', { ...VALID['new-entry'], title: 'Propose agent run books, in full',
     entry: { ...newEntry, judgement: newEntry.judgement.repeat(14).slice(0, 3900), where: 'Production agents. '.repeat(50), test: 'Rehearse the run book. '.repeat(40) } });
   const lsub = await call('submit_contribution', { draft_id: long.structuredContent?.draft_id ?? 'none' });
@@ -306,9 +306,9 @@ async function contributing(client, t) {
   check(t('my_contributions without GitHub says the status is on the GitHub issue'), !mine.isError && /status on its GitHub issue/.test(textOf(mine)) && textOf(mine).includes(C.forms.repo));
   const revise = await call('revise_contribution', { id: 'C-0001', draft_id: drafts.correction.draft_id });
   check(t('revise_contribution without GitHub says how to connect'), revise.isError === true && /GitHub account/.test(textOf(revise)));
-  const apply = await call('apply_to_contribute', { name: 'Jane Doe', affiliation: 'Example Ltd', experience: 'Ten years of platform engineering.', links: 'https://example.org/jane', disclosure: 'None' });
+  const apply = await call('apply_to_review', { name: 'Jane Doe', affiliation: 'Example Ltd', experience: 'Ten years of platform engineering.', links: 'https://example.org/jane', disclosure: 'None' });
   const aq = new URL(apply.structuredContent?.url ?? 'https://invalid.example/').searchParams;
-  check(t('apply_to_contribute returns the pre-filled apply form'), aq.get('template') === 'apply.yml' && aq.get('name') === 'Jane Doe' && aq.get('affiliation') === 'Example Ltd'
+  check(t('apply_to_review returns the pre-filled form to apply to review'), aq.get('template') === 'apply.yml' && aq.get('name') === 'Jane Doe' && aq.get('affiliation') === 'Example Ltd'
     && aq.get('experience') === 'Ten years of platform engineering.' && aq.get('links') === 'https://example.org/jane' && aq.get('disclosure') === 'None' && /Submit new issue/.test(textOf(apply)));
 }
 
@@ -686,8 +686,9 @@ async function githubFlow() {
     const stranger = await as({ RADAR_GITHUB_TOKEN: T.stranger });
     const sp = await stranger('prepare_contribution', VALID.review);
     const ss = await stranger('submit_contribution', { draft_id: sp.structuredContent?.draft_id });
-    check(t('someone not on the list can submit, and is told the issue waits until an application is approved'),
-      ss.structuredContent?.status === 'needs-approval' && /not on the list of people yet/.test(textOf(ss)) && /not on it yet/.test(textOf(ss)), textOf(ss).slice(0, 500));
+    check(t('anyone can contribute: someone not on the list submits, the contribution goes straight to review, and they are told they join the list once it is approved'),
+      ss.structuredContent?.status === 'in-review' && /Thank you for contributing/.test(textOf(ss))
+      && /joins the list of people as a contributor/.test(textOf(ss)), textOf(ss).slice(0, 500));
 
     // signing in with GitHub, from an assistant with no token
     const fresh = await as({ RADAR_GITHUB_CLIENT_ID: 'Iv23test', RADAR_CONFIG_DIR: configDir });
