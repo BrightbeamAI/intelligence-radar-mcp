@@ -7,8 +7,8 @@
 | | What you can do | Who |
 |---|---|---|
 | **Read** | Search the 103 entries in nine dimensions, read the evidence, check a plan or roadmap against them, read the sector lens and see the interactive radar | Anyone. Runs on your computer, with no network needed |
-| **Contribute** | Send a review, a correction, evidence, a label change or a new entry, checked against the current edition and shown to you before anything is sent | Anyone, after signing in with GitHub from the conversation |
-| **Review** | See the contributions waiting for you, read each one beside the entry's current text, and approve, edit, ask for changes or decline, with your reason | Specialist reviewers and editors |
+| **Contribute** | Send a review of an entry, a correction, evidence, a label change or a new entry, checked against the current edition and shown to you before anything is sent | Anyone, after signing in with GitHub from the conversation |
+| **Decide** | See the contributions waiting for you, read each one beside the entry's current text, and approve, edit, ask for changes or decline, with your reason | Specialist reviewers and editors |
 
 Each entry carries an intelligence label (Use, Trial, Evaluate, Wait, Prepare) and an enterprise label (Revisit, Test, Plan for, Watch).
 
@@ -42,16 +42,16 @@ Anyone can contribute. The assistant signs you in with GitHub once (a short code
 
 Tools: `how_to_contribute`, `sign_in_with_github`, `prepare_contribution`, `submit_contribution`, `my_contributions`, `revise_contribution` and `withdraw_contribution`.
 
-## Review
+## Decide
 
 - "What is waiting for my review?"
 - "Open C-0012 and show me the proposed edits beside the entry."
 - "Approve C-0012: the announcement confirms it."
 - "Ask for changes on C-0015: name the regulator."
 
-For specialist reviewers and editors on the list of people. Decisions are posted on the issue under your GitHub account, exactly as a command typed on GitHub would be, and recorded in CHAP. To become a specialist reviewer, ask the assistant to apply to review.
+For specialist reviewers and editors on the list of people, who decide on contributions: approve, edit, ask for changes or decline, each with a reason (label changes and new entries also need an editor). Decisions are posted on the issue under your GitHub account, exactly as a command typed on GitHub would be, and recorded in CHAP. To become a specialist reviewer, ask the assistant to apply to be one.
 
-Tools: `review_queue`, `open_contribution`, `decide_contribution`, `edit_contribution`, `publish_queue` (editors) and `apply_to_review`.
+Tools: `review_queue`, `open_contribution`, `decide_contribution`, `edit_contribution`, `publish_queue` (editors) and `apply_as_reviewer`.
 
 ## Licence
 

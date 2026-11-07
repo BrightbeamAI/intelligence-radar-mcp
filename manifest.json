@@ -101,8 +101,8 @@
       "description": "Withdraws your contribution before a final decision."
     },
     {
-      "name": "apply_to_review",
-      "description": "A pre-filled link to apply to become a specialist reviewer. Contributing needs no application."
+      "name": "apply_as_reviewer",
+      "description": "A pre-filled link to apply to be a specialist reviewer, deciding on contributions alongside the editors. Contributing needs no application."
     },
     {
       "name": "review_queue",
