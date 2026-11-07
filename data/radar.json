@@ -13,7 +13,7 @@
   "site_url": "https://theintelligenceradar.com/",
   "licence": "Creative Commons Attribution 4.0 International (CC BY 4.0)",
   "licence_url": "https://creativecommons.org/licenses/by/4.0/",
-  "cite": "Brightbeam (2026). The Intelligence Radar, H2 2026 (Volume 1): Room to act."
+  "cite": "The Intelligence Radar (2026). H2 2026 edition (Volume 1): Room to act."
  },
  "legend": "Each label is a judgement, and it holds under the conditions its entry states. Check an entry again when your own test disagrees with it, when something goes wrong in use, or when your model, data, tools, licence or scope changes. The products named are examples: compare them on your own work before you buy.",
  "labels": {
@@ -7579,7 +7579,7 @@
        "id": "credit_name",
        "label": "Name to credit",
        "to": "credit.name",
-       "description": "Leave empty to use your name on the list of people.",
+       "description": "Leave empty to use your name on the list of people, or your GitHub username.",
        "placeholder": "",
        "required": false
       },
@@ -7701,7 +7701,7 @@
        "id": "credit_name",
        "label": "Name to credit",
        "to": "credit.name",
-       "description": "Leave empty to use your name on the list of people.",
+       "description": "Leave empty to use your name on the list of people, or your GitHub username.",
        "placeholder": "",
        "required": false
       },
@@ -7810,7 +7810,7 @@
        "id": "credit_name",
        "label": "Name to credit",
        "to": "credit.name",
-       "description": "Leave empty to use your name on the list of people.",
+       "description": "Leave empty to use your name on the list of people, or your GitHub username.",
        "placeholder": "",
        "required": false
       },
@@ -7946,7 +7946,7 @@
        "id": "credit_name",
        "label": "Name to credit",
        "to": "credit.name",
-       "description": "Leave empty to use your name on the list of people.",
+       "description": "Leave empty to use your name on the list of people, or your GitHub username.",
        "placeholder": "",
        "required": false
       },
@@ -8135,7 +8135,7 @@
        "id": "credit_name",
        "label": "Name to credit",
        "to": "credit.name",
-       "description": "Leave empty to use your name on the list of people.",
+       "description": "Leave empty to use your name on the list of people, or your GitHub username.",
        "placeholder": "",
        "required": false
       },
@@ -8165,9 +8165,9 @@
     {
      "file": "apply.yml",
      "kind": null,
-     "name": "Apply to contribute",
+     "name": "Apply to review",
      "title": "[Apply] ",
-     "description": "Ask to become an approved contributor or specialist reviewer.",
+     "description": "Ask to become a specialist reviewer or an editor of The Intelligence Radar.",
      "fields": [
       {
        "type": "input",
@@ -8193,8 +8193,8 @@
        "label": "Role",
        "to": "role",
        "options": [
-        "Contributor",
-        "Specialist reviewer"
+        "Specialist reviewer",
+        "Editor"
        ],
        "description": "",
        "required": false
