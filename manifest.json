@@ -4,8 +4,8 @@
   "name": "intelligence-radar",
   "display_name": "The Intelligence Radar",
   "version": "0.0.0",
-  "description": "Search The Intelligence Radar, check a plan against it and see the radar in the conversation.",
-  "long_description": "The Intelligence Radar is a community-driven radar for technical leaders. This extension gives your AI assistant the current edition: 103 entries in nine dimensions, each with an intelligence label for readiness under stated conditions (Use, Trial, Evaluate, Wait or Prepare) and an enterprise label for what to do now (Revisit, Test, Plan for or Watch), with the judgement, where it fits, the test to run first, the failure to watch for and the numbered sources. Ask it to search The Intelligence Radar, explain an entry or a dimension, check a roadmap against it, plan a trial or show the interactive radar. Approved contributors can also prepare and submit reviews, corrections, evidence, label changes and new entries, and specialist reviewers and editors can review them. The extension runs on your computer and carries the edition's data. Reading The Intelligence Radar needs no network. Contributions and reviews go to GitHub, in the public contributions repository, once you sign in with GitHub from the conversation; there the review desk checks each one against the list of people.",
+  "description": "Read The Intelligence Radar, check a plan against it, see the radar in the conversation, and send contributions and reviews.",
+  "long_description": "The Intelligence Radar is a community-driven radar for technical leaders. This extension gives your AI assistant the current edition: 103 entries in nine dimensions, each with an intelligence label for readiness under stated conditions (Use, Trial, Evaluate, Wait or Prepare) and an enterprise label for what to do now (Revisit, Test, Plan for or Watch), with the judgement, where it fits, the test to run first, the failure to watch for and the numbered sources. Ask it to search The Intelligence Radar, explain an entry or a dimension, check a roadmap against it, plan a trial or show the interactive radar. Anyone can also prepare and submit reviews, corrections, evidence, label changes and new entries from the conversation, and specialist reviewers and editors can review them there too. The extension runs on your computer and carries the edition's data. Reading The Intelligence Radar needs no network. Contributions and reviews go to GitHub, in the public contributions repository, once you sign in with GitHub from the conversation; there the review desk checks each one and sends it to the editors and specialist reviewers.",
   "author": {
     "name": "Brightbeam",
     "url": "https://www.brightbeam.com"
@@ -15,7 +15,7 @@
   "support": "https://www.brightbeam.com/contact-us",
   "repository": {
     "type": "git",
-    "url": "https://github.com/BrightbeamAI/Intelligence-Radar"
+    "url": "https://github.com/BrightbeamAI/intelligence-radar-mcp"
   },
   "icon": "icon.png",
   "server": {
@@ -101,8 +101,8 @@
       "description": "Withdraws your contribution before a final decision."
     },
     {
-      "name": "apply_to_contribute",
-      "description": "A pre-filled link to apply to join the list of people as a contributor or specialist reviewer."
+      "name": "apply_to_review",
+      "description": "A pre-filled link to apply to become a specialist reviewer. Contributing needs no application."
     },
     {
       "name": "review_queue",
