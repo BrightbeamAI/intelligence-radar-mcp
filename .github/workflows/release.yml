@@ -1,0 +1,53 @@
+# Publishes a release: build, test, then npm (trusted publishing: no npm token is stored anywhere) and the MCP Registry
+# (io.github.brightbeamai/intelligence-radar, through GitHub's OIDC). Runs when a GitHub release is published with a
+# tag of v and the version in package.json, for example v2026.2.1. See DEVELOPING.md.
+name: Release
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+  id-token: write   # npm trusted publishing and the MCP Registry
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+      - name: npm 11, for trusted publishing
+        run: npm install -g npm@11 --no-audit --no-fund
+      - name: The tag matches package.json
+        env:
+          TAG: ${{ github.event.release.tag_name }}
+        run: |
+          VERSION="$(node -p "require('./package.json').version")"
+          if [ "$TAG" != "v$VERSION" ]; then
+            echo "The release tag $TAG does not match package.json ($VERSION): tag the release v$VERSION."
+            exit 1
+          fi
+      - run: npm ci --no-audit --no-fund
+      - run: npm run build
+      - run: npm test
+      - name: Publish to npm
+        run: npm publish --access public
+      - name: Publish to the MCP Registry
+        run: |
+          node -e "const fs=require('fs');const v=require('./package.json').version;const s=JSON.parse(fs.readFileSync('server.json','utf8'));s.version=v;s.packages.forEach(p=>p.version=v);fs.writeFileSync('server.json',JSON.stringify(s,null,2)+'\n')"
+          OS="$(uname -s | tr '[:upper:]' '[:lower:]')"
+          ARCH="$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/')"
+          curl -fsSL "https://github.com/modelcontextprotocol/registry/releases/latest/download/mcp-publisher_${OS}_${ARCH}.tar.gz" | tar xz mcp-publisher
+          ./mcp-publisher login github-oidc
+          ./mcp-publisher publish

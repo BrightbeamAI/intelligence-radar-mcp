@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Intelligence Radar</title>
+<style>/*FONT*//*CSS*/</style>
+</head>
+<body>
+<main class="rv" id="rv">
+  <header class="rv-top">
+    <div class="rv-brand"><b>The Intelligence Radar</b> <span id="rv-edition"></span></div>
+    <div class="rv-top-r"><span class="rv-count" id="rv-count"></span><button type="button" class="rv-btn rv-ghost" id="rv-expand" hidden>Expand</button></div>
+  </header>
+  <p class="rv-caption" id="rv-caption" hidden></p>
+  <div class="rv-filters" role="toolbar" aria-label="Filters">
+    <div class="rv-row rv-dimensions" id="rv-dimensions"></div>
+    <div class="rv-row">
+      <div class="rv-group rv-secs" id="rv-sec" role="group" aria-label="Sector lens" hidden></div>
+      <div class="rv-group" id="rv-tech" aria-label="Intelligence label"></div>
+      <div class="rv-group" id="rv-ent" aria-label="Enterprise label"></div>
+      <label class="rv-search"><span class="rv-sr">Search the entries</span><input type="search" id="rv-q" placeholder="Search entries" autocomplete="off"></label>
+    </div>
+  </div>
+  <div class="rv-body">
+    <div class="rv-stage" id="rv-stage"></div>
+    <aside class="rv-side" id="rv-side" aria-live="polite"></aside>
+  </div>
+  <footer class="rv-foot"><span id="rv-foot"></span></footer>
+</main>
+<script type="application/json" id="rv-data">/*DATA*/</script>
+<template id="rv-svg-light"><!--SVG_LIGHT--></template>
+<template id="rv-svg-dark"><!--SVG_DARK--></template>
+<script>/*JS*/</script>
+</body>
+</html>

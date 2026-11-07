@@ -1,0 +1,157 @@
+{
+  "$schema": "https://raw.githubusercontent.com/anthropics/mcpb/main/schemas/mcpb-manifest-v0.3.schema.json",
+  "manifest_version": "0.3",
+  "name": "intelligence-radar",
+  "display_name": "The Intelligence Radar",
+  "version": "0.0.0",
+  "description": "Search The Intelligence Radar, check a plan against it and see the radar in the conversation.",
+  "long_description": "The Intelligence Radar is a community-driven radar for technical leaders. This extension gives your AI assistant the current edition: 103 entries in nine dimensions, each with an intelligence label for readiness under stated conditions (Use, Trial, Evaluate, Wait or Prepare) and an enterprise label for what to do now (Revisit, Test, Plan for or Watch), with the judgement, where it fits, the test to run first, the failure to watch for and the numbered sources. Ask it to search The Intelligence Radar, explain an entry or a dimension, check a roadmap against it, plan a trial or show the interactive radar. Approved contributors can also prepare and submit reviews, corrections, evidence, label changes and new entries, and specialist reviewers and editors can review them. The extension runs on your computer and carries the edition's data. Reading The Intelligence Radar needs no network. Contributions and reviews go to GitHub, in the public contributions repository, once you sign in with GitHub from the conversation; there the review desk checks each one against the list of people.",
+  "author": {
+    "name": "Brightbeam",
+    "url": "https://www.brightbeam.com"
+  },
+  "homepage": "https://theintelligenceradar.com/ai-tools.html",
+  "documentation": "https://theintelligenceradar.com/ai-tools.html",
+  "support": "https://www.brightbeam.com/contact-us",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/BrightbeamAI/Intelligence-Radar"
+  },
+  "icon": "icon.png",
+  "server": {
+    "type": "node",
+    "entry_point": "server/index.mjs",
+    "mcp_config": {
+      "command": "node",
+      "args": [
+        "${__dirname}/server/index.mjs"
+      ],
+      "env": {
+        "RADAR_GITHUB_TOKEN": "${user_config.github_token}"
+      }
+    }
+  },
+  "tools": [
+    {
+      "name": "about_radar",
+      "description": "What The Intelligence Radar is, this edition, how to read its labels and the nine dimensions."
+    },
+    {
+      "name": "search_radar",
+      "description": "Find entries by topic or keyword, with filters by dimension, label and sector."
+    },
+    {
+      "name": "get_entry",
+      "description": "The full entry: judgement, conditions, where it fits, the test to run first, the failure to watch for and its sources."
+    },
+    {
+      "name": "list_dimensions",
+      "description": "The nine dimensions with their questions and entries by ring."
+    },
+    {
+      "name": "get_dimension",
+      "description": "One dimension: what it covers, what its placements imply and its entries."
+    },
+    {
+      "name": "check_plan",
+      "description": "Match a plan, roadmap or architecture against the Radar."
+    },
+    {
+      "name": "get_sector",
+      "description": "The sector lens: what binds in a sector, where to start, and the entries placed differently there."
+    },
+    {
+      "name": "list_judgements",
+      "description": "This edition's enterprise judgements."
+    },
+    {
+      "name": "get_sources",
+      "description": "The numbered sources, with links."
+    },
+    {
+      "name": "show_radar",
+      "description": "Show the interactive radar in the conversation."
+    },
+    {
+      "name": "how_to_contribute",
+      "description": "How to contribute: what can be contributed, what reviewers need, how review works, and whether this assistant is connected to GitHub."
+    },
+    {
+      "name": "sign_in_with_github",
+      "description": "Connects the assistant to your GitHub account with a short code, once."
+    },
+    {
+      "name": "prepare_contribution",
+      "description": "Checks a contribution against this edition and returns its preview and a draft_id. Sends nothing."
+    },
+    {
+      "name": "submit_contribution",
+      "description": "Submits a prepared draft, after the person agrees: as a GitHub issue from your account when signed in, otherwise as a pre-filled GitHub issue to open."
+    },
+    {
+      "name": "my_contributions",
+      "description": "The status of your contributions, with the reviewers' decisions and reasons."
+    },
+    {
+      "name": "revise_contribution",
+      "description": "Sends a revised version of your contribution."
+    },
+    {
+      "name": "withdraw_contribution",
+      "description": "Withdraws your contribution before a final decision."
+    },
+    {
+      "name": "apply_to_contribute",
+      "description": "A pre-filled link to apply to join the list of people as a contributor or specialist reviewer."
+    },
+    {
+      "name": "review_queue",
+      "description": "Reviewers and editors: the contributions waiting for your review."
+    },
+    {
+      "name": "open_contribution",
+      "description": "Reviewers and editors: one contribution in full, with the entry's current text beside the proposed edits."
+    },
+    {
+      "name": "decide_contribution",
+      "description": "Reviewers and editors: records your decision (approve, request changes or decline) with your reason."
+    },
+    {
+      "name": "edit_contribution",
+      "description": "Reviewers and editors: edits a contribution and approves the result, with your reason."
+    },
+    {
+      "name": "publish_queue",
+      "description": "Editors: approved contributions waiting to be published."
+    }
+  ],
+  "prompts_generated": true,
+  "user_config": {
+    "github_token": {
+      "type": "string",
+      "title": "GitHub token (optional)",
+      "description": "Only if you prefer a token to signing in with GitHub from the conversation: a GitHub token that can open issues and comment on BrightbeamAI/Intelligence-Radar-Contributions.",
+      "sensitive": true,
+      "required": false
+    }
+  },
+  "keywords": [
+    "ai",
+    "technology radar",
+    "cto",
+    "strategy",
+    "governance",
+    "agents"
+  ],
+  "license": "MIT AND CC-BY-4.0",
+  "compatibility": {
+    "platforms": [
+      "darwin",
+      "win32",
+      "linux"
+    ],
+    "runtimes": {
+      "node": ">=20.0.0"
+    }
+  }
+}

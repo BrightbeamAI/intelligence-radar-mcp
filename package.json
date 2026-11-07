@@ -1,0 +1,53 @@
+{
+  "name": "@brightbeamai/intelligence-radar-mcp",
+  "version": "2026.2.0",
+  "description": "The Intelligence Radar as an MCP server: search its entries, check a plan against them and show the radar in the conversation.",
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "mcp-apps",
+    "technology-radar",
+    "ai",
+    "cto",
+    "intelligence-radar"
+  ],
+  "homepage": "https://theintelligenceradar.com/ai-tools.html",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BrightbeamAI/intelligence-radar-mcp.git"
+  },
+  "bugs": {
+    "url": "https://github.com/BrightbeamAI/intelligence-radar-mcp/issues"
+  },
+  "author": "Brightbeam (https://www.brightbeam.com)",
+  "license": "MIT AND CC-BY-4.0",
+  "mcpName": "io.github.brightbeamai/intelligence-radar",
+  "type": "module",
+  "bin": {
+    "intelligence-radar-mcp": "dist/index.mjs"
+  },
+  "files": [
+    "dist/index.mjs",
+    "src/",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "test": "node scripts/test.mjs",
+    "start": "node dist/index.mjs"
+  },
+  "devDependencies": {
+    "@modelcontextprotocol/client": "^2.4.0",
+    "@modelcontextprotocol/ext-apps": "^2.0.4",
+    "@modelcontextprotocol/server": "^2.4.0",
+    "esbuild": "^0.28.2",
+    "zod": "^4.2.0"
+  }
+}

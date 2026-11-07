@@ -1,0 +1,31 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.brightbeamai/intelligence-radar",
+  "title": "The Intelligence Radar",
+  "description": "Search The Intelligence Radar, check a plan against it and see the radar in the conversation.",
+  "repository": {
+    "url": "https://github.com/BrightbeamAI/intelligence-radar-mcp",
+    "source": "github"
+  },
+  "websiteUrl": "https://theintelligenceradar.com/ai-tools.html",
+  "version": "2026.2.0",
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "@brightbeamai/intelligence-radar-mcp",
+      "version": "2026.2.0",
+      "transport": {
+        "type": "stdio"
+      },
+      "environmentVariables": [
+        {
+          "name": "RADAR_GITHUB_TOKEN",
+          "description": "Optional. A GitHub token that can open issues and comment on BrightbeamAI/Intelligence-Radar-Contributions, for contributing and reviewing without signing in from the conversation.",
+          "isRequired": false,
+          "isSecret": true,
+          "format": "string"
+        }
+      ]
+    }
+  ]
+}
