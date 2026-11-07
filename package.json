@@ -1,7 +1,7 @@
 {
   "name": "@brightbeamai/intelligence-radar-mcp",
   "version": "2026.2.1",
-  "description": "The Intelligence Radar as an MCP server: search its entries, check a plan against them and show the radar in the conversation.",
+  "description": "The Intelligence Radar as an MCP server: read and search its entries, check a plan against them, show the radar in the conversation, and send contributions and reviews.",
   "keywords": [
     "mcp",
     "model-context-protocol",
