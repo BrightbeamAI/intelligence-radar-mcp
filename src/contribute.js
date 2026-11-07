@@ -484,7 +484,7 @@ function howTo(gh) {
     '5. When changes are asked for, prepare the new version and send it with revise_contribution. my_contributions shows the status and the reasons.',
     '6. An editor publishes approved contributions in a later release of The Intelligence Radar, crediting the contributor by name unless they chose otherwise.', '',
     '## This install', '', connection(gh), '',
-    'To review contributions as a specialist reviewer, apply_to_review gives the link to apply.'];
+    'To decide on contributions alongside the editors, as a specialist reviewer, apply_as_reviewer gives the link to apply.'];
 }
 
 const SIGN = { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true };
@@ -685,10 +685,11 @@ function contributorTools(server, gh, grant) {
     return reply(gh, [`Asked the review desk to withdraw ${contributionId(c.issue.number)} (issue #${c.issue.number}).`, ...answered(said)], { id: contributionId(c.issue.number), desk: said });
   }));
 
-  server.registerTool('apply_to_review', {
-    title: 'Apply to review',
-    description: 'A pre-filled link to the form for becoming a specialist reviewer (or an editor) of The Intelligence Radar. Contributing needs no application: '
-      + 'anyone can contribute. The application is a public GitHub issue that an editor reviews. Fill in only what the person gives.',
+  server.registerTool('apply_as_reviewer', {
+    title: 'Apply to be a specialist reviewer',
+    description: 'A pre-filled link to the form for applying to be a specialist reviewer (or an editor) of The Intelligence Radar: specialist reviewers decide on '
+      + 'contributions alongside the editors. Contributing, including reviewing an entry, needs no application. The application is a public GitHub issue '
+      + 'that an editor reviews. Fill in only what the person gives.',
     inputSchema: z.object({
       name: z.string().max(120).optional(),
       affiliation: z.string().max(160).optional().describe('Their organisation, or Independent'),
@@ -706,7 +707,7 @@ function contributorTools(server, gh, grant) {
       if (v && v.trim()) q.set(f.id, v.trim());
     }
     const url = `https://github.com/${FORMS.repo}/issues/new?${q}`;
-    return reply(gh, ['To apply to review, open this link, check the form, choose a role and the areas you know best, tick the terms and press Submit new issue:', '', url, '',
+    return reply(gh, ['To apply to be a specialist reviewer, open this link, check the form, choose a role and the areas you know best, tick the terms and press Submit new issue:', '', url, '',
       'The application is a public GitHub issue, so share only what you are happy to publish. An editor reviews it. Once approved, your GitHub account is on the '
         + 'list of people as a specialist reviewer, and the review tools (review_queue, open_contribution, decide_contribution, edit_contribution) work for you.'],
     { url });
