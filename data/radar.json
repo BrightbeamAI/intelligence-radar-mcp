@@ -7329,7 +7329,7 @@
    "github_repo": "BrightbeamAI/Intelligence-Radar-Contributions",
    "records_repo": "BrightbeamAI/Intelligence-Radar",
    "records_branch": "records",
-   "github_app_client_id": "",
+   "github_app_client_id": "Iv23liZ5wlSB6OZmEcMB",
    "desk_bot": "github-actions[bot]",
    "workspace": "wsp_intelligence_radar",
    "kinds": {
@@ -9131,5 +9131,5 @@
    }
   }
  },
- "version": "2026.2.0"
+ "version": "2026.2.1"
 }
