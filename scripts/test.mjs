@@ -21,7 +21,7 @@ const textOf = (r) => (r.content || []).filter((c) => c.type === 'text').map((c)
 const same = (a, b) => JSON.stringify([...a].sort()) === JSON.stringify([...b].sort());
 
 const READING = ['about_radar', 'check_plan', 'get_dimension', 'get_entry', 'get_sector', 'get_sources', 'list_dimensions', 'list_judgements', 'search_radar', 'show_radar'];
-const CONTRIBUTOR = ['apply_to_review', 'how_to_contribute', 'my_contributions', 'prepare_contribution', 'revise_contribution', 'sign_in_with_github',
+const CONTRIBUTOR = ['apply_as_reviewer', 'how_to_contribute', 'my_contributions', 'prepare_contribution', 'revise_contribution', 'sign_in_with_github',
   'submit_contribution', 'withdraw_contribution'];
 const NO_SIGN_IN = mkdtempSync(path.join(os.tmpdir(), 'radar-mcp-config-')); // an empty configuration folder: no saved sign-in
 const REVIEWER = ['decide_contribution', 'edit_contribution', 'open_contribution', 'review_queue'];
@@ -46,8 +46,8 @@ async function run(label, options) {
   check(t('lists the ten reading tools and, without a GitHub connection, the eight contributor tools'), same(names, [...READING, ...CONTRIBUTOR]), names.join(', '));
   check(t('marks the reading tools read-only'), tools.filter((x) => READING.includes(x.name)).every((x) => x.annotations?.readOnlyHint === true));
   const ann = Object.fromEntries(tools.map((x) => [x.name, x.annotations ?? {}]));
-  check(t('marks how_to_contribute, prepare_contribution, apply_to_review and my_contributions read-only'),
-    ['how_to_contribute', 'prepare_contribution', 'apply_to_review', 'my_contributions'].every((n) => ann[n]?.readOnlyHint === true));
+  check(t('marks how_to_contribute, prepare_contribution, apply_as_reviewer and my_contributions read-only'),
+    ['how_to_contribute', 'prepare_contribution', 'apply_as_reviewer', 'my_contributions'].every((n) => ann[n]?.readOnlyHint === true));
   check(t('marks submit_contribution and revise_contribution as writes that destroy nothing and reach GitHub; submitting is idempotent'),
     ['submit_contribution', 'revise_contribution'].every((n) => ann[n]?.readOnlyHint === false && ann[n]?.destructiveHint === false && ann[n]?.openWorldHint === true)
     && ann.submit_contribution?.idempotentHint === true);
@@ -306,9 +306,9 @@ async function contributing(client, t) {
   check(t('my_contributions without GitHub says the status is on the GitHub issue'), !mine.isError && /status on its GitHub issue/.test(textOf(mine)) && textOf(mine).includes(C.forms.repo));
   const revise = await call('revise_contribution', { id: 'C-0001', draft_id: drafts.correction.draft_id });
   check(t('revise_contribution without GitHub says how to connect'), revise.isError === true && /GitHub account/.test(textOf(revise)));
-  const apply = await call('apply_to_review', { name: 'Jane Doe', affiliation: 'Example Ltd', experience: 'Ten years of platform engineering.', links: 'https://example.org/jane', disclosure: 'None' });
+  const apply = await call('apply_as_reviewer', { name: 'Jane Doe', affiliation: 'Example Ltd', experience: 'Ten years of platform engineering.', links: 'https://example.org/jane', disclosure: 'None' });
   const aq = new URL(apply.structuredContent?.url ?? 'https://invalid.example/').searchParams;
-  check(t('apply_to_review returns the pre-filled form to apply to review'), aq.get('template') === 'apply.yml' && aq.get('name') === 'Jane Doe' && aq.get('affiliation') === 'Example Ltd'
+  check(t('apply_as_reviewer returns the pre-filled form to apply to be a specialist reviewer'), aq.get('template') === 'apply.yml' && aq.get('name') === 'Jane Doe' && aq.get('affiliation') === 'Example Ltd'
     && aq.get('experience') === 'Ten years of platform engineering.' && aq.get('links') === 'https://example.org/jane' && aq.get('disclosure') === 'None' && /Submit new issue/.test(textOf(apply)));
 }
 
