@@ -312,7 +312,14 @@ const labelsOf = (issue) => (issue.labels ?? []).map((l) => (typeof l === 'strin
 const kindOf = (issue) => L.KINDS.find((k) => labelsOf(issue).includes(k))
   ?? FORMS.forms.find((f) => f.kind && String(issue.title ?? '').startsWith(f.title.trim()))?.kind ?? null;
 const statusOf = (issue) => STATUS_LABELS.find((l) => labelsOf(issue).includes(l)) ?? 'new';
-const unmarked = (body) => String(body ?? '').replace(/<!-- radar-desk [\s\S]*?-->/g, '').trim();
+// The review desk writes to contributors in cards made for GitHub: a header image linked to the website, "### " and the title,
+// the text, a <sub> footer, then any notes for the reviewers after a rule, and its event markers last.
+const CARD_HEADER = /^\s*(?:<a\b[^>]*>\s*)?<img\b[^>]*>\s*(?:<\/a>)?\s*$/i; // a line that holds only an image, linked or not
+const CARD_FOOTER = /^\s*<sub>.*<\/sub>\s*$/i;
+/** A comment of the review desk as plain text for the assistant: the title as its first line, the text and any notes for the reviewers. */
+const deskText = (body) => String(body ?? '').replace(/<!-- radar-desk [\s\S]*?-->/g, '').split(/\r?\n/)
+  .filter((line) => !CARD_HEADER.test(line) && !CARD_FOOTER.test(line)).join('\n')
+  .replace(/\n{3,}/g, '\n\n').trim().replace(/^#{1,6}[ \t]+/, '');
 const sleep = (ms) => new Promise((ok) => setTimeout(ok, ms));
 const article = (role) => (role === 'editor' ? 'an editor' : role === 'reviewer' ? 'a specialist reviewer' : 'a contributor');
 
@@ -330,13 +337,13 @@ async function full(gh, n) {
   return { issue, kind, comments, st: contributionState(eventsOf(comments, BOT), C.config, kind) };
 }
 
-/** After writing to an issue, the review desk's answer: its first comment after `afterId`, waiting up to gh.wait. */
+/** After writing to an issue, the review desk's answer: its first comment after `afterId`, as plain text, waiting up to gh.wait. */
 async function deskAnswer(gh, n, afterId = 0) {
   const until = Date.now() + gh.wait;
   for (;;) {
     const comments = await pages(gh, `/repos/${gh.repo}/issues/${n}/comments`);
     const answer = comments.find((c) => c.user?.login === BOT && c.id > afterId);
-    if (answer) return unmarked(answer.body);
+    if (answer) return deskText(answer.body);
     if (Date.now() + 3000 > until) return null;
     await sleep(3000);
   }
