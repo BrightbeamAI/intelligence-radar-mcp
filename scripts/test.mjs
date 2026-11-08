@@ -621,7 +621,8 @@ async function githubFlow() {
     const s = sub.structuredContent ?? {};
     check(t('submit_contribution opens issue #1 from the contributor\'s account, and the review desk takes it in'),
       !sub.isError && s.route === 'github-issue' && s.id === 'C-0001' && s.issue === 1 && s.status === 'in-review'
-      && /Received: correction from @cont-three/.test(textOf(sub)) && gh.issues.get(1)?.user.login === 'cont-three', textOf(sub).slice(0, 500));
+      && /^> Received: your correction to IR-028\n>\n> Thank you for contributing to The Intelligence Radar, @cont-three\./m.test(textOf(sub))
+      && gh.issues.get(1)?.user.login === 'cont-three', textOf(sub).slice(0, 500));
     const again = await cora('submit_contribution', { draft_id: draft });
     check(t('submitting the same draft again opens nothing new'), again.structuredContent?.repeated === true && again.structuredContent.id === 'C-0001' && gh.issues.size === 1);
 
@@ -638,7 +639,8 @@ async function githubFlow() {
     check(t('a decision on a version the reviewer did not read is refused'), stale.isError === true && /changed since you read it/.test(textOf(stale)), textOf(stale));
     const ok = await ravi('decide_contribution', { id: 'c-1', decision: 'approve', rationale: 'Matches the announcement.', digest: dg });
     check(t('the reviewer approves it: the decision is a comment from their account, and the desk approves it'),
-      !ok.isError && /\*\*Approved\.\*\*/.test(deskSaid(ok)) && gh.commentsOn(1).some((c) => c.user.login === 'rev-two' && c.body.startsWith('/approve sha256:'))
+      !ok.isError && /^Approved\n\nVersion 1 approved by @rev-two/.test(deskSaid(ok)) && /will be published on TheIntelligenceRadar\.com in the next release/.test(deskSaid(ok))
+      && gh.commentsOn(1).some((c) => c.user.login === 'rev-two' && c.body.startsWith('/approve sha256:'))
       && gh.labelsOf(1).includes('approved'), textOf(ok));
     const mine = await cora('my_contributions');
     const mine1 = await cora('my_contributions', { id: 'C-0001' });
@@ -655,18 +657,23 @@ async function githubFlow() {
     const r1 = await ravi('decide_contribution', { id: ln, decision: 'approve', rationale: 'The evidence holds up.', digest: ldg });
     const e1 = await edna('decide_contribution', { id: ln, decision: 'approve', rationale: 'Agreed: the label moves.', digest: ldg });
     check(t("a label change needs an editor's approval: a specialist reviewer's alone leaves it in review"),
-      /It needs an editor's approval/.test(deskSaid(r1)) && /\*\*Approved\.\*\*/.test(deskSaid(e1)), `${textOf(r1)} | ${textOf(e1)}`);
+      /^Approval recorded\n\n/.test(deskSaid(r1)) && /still needs an editor's approval/.test(deskSaid(r1))
+      && /^Approved\n\nVersion 1 approved by @ed-one/.test(deskSaid(e1)), `${textOf(r1)} | ${textOf(e1)}`);
+    check(t('the review desk\'s notes for the reviewers reach the reviewer, after the text'),
+      /\n\n---\n\n\*\*For the reviewers\.\*\* It needs an editor's approval\./.test(deskSaid(r1)), deskSaid(r1));
 
     // changes asked for, a revision, then a reviewer's edit that approves it
     const p3 = await cora('prepare_contribution', { ...VALID.correction, title: 'Give the foundation its short name' });
     const s3 = (await cora('submit_contribution', { draft_id: p3.structuredContent?.draft_id })).structuredContent ?? {};
     const d3 = (await ravi('open_contribution', { id: s3.id })).structuredContent?.digest;
     const asked = await ravi('decide_contribution', { id: s3.id, decision: 'request_changes', rationale: 'Add a source from the foundation itself.', digest: d3 });
-    check(t('the reviewer asks for changes'), /asked for changes/.test(deskSaid(asked)) && gh.labelsOf(s3.issue).includes('changes-requested'), textOf(asked));
+    check(t('the reviewer asks for changes'), /^Changes requested\n\n@rev-two \(specialist reviewer\) asked for changes/.test(deskSaid(asked))
+      && gh.labelsOf(s3.issue).includes('changes-requested'), textOf(asked));
     const p4 = await cora('prepare_contribution', { ...VALID.correction, title: 'Give the foundation its short name',
       evidence: [{ url: 'https://example.org/aaif-charter', title: 'Charter', publisher: 'Agentic AI Foundation' }] });
     const rev = await cora('revise_contribution', { id: s3.id, draft_id: p4.structuredContent?.draft_id });
-    check(t('the contributor sends a revised version, which goes back to review'), !rev.isError && /Version 2 received from @cont-three/.test(deskSaid(rev))
+    check(t('the contributor sends a revised version, which goes back to review'), !rev.isError
+      && /^Version 2 received\n\nThank you, @cont-three\. Version 2 is with the reviewers again\./.test(deskSaid(rev))
       && gh.labelsOf(s3.issue).includes('in-review'), textOf(rev));
     const v2 = (await ravi('open_contribution', { id: s3.id })).structuredContent ?? {};
     const bad = await ravi('edit_contribution', { id: s3.id, rationale: 'Shorter wording reads better.', digest: v2.digest,
@@ -675,20 +682,30 @@ async function githubFlow() {
     const edited = await ravi('edit_contribution', { id: s3.id, rationale: 'The short name in brackets is enough.', digest: v2.digest,
       edits: [{ section: 'judgement', find: FIND, replace: `${FIND} (the check)` }] });
     check(t('the reviewer edits it: the desk rewrites the issue, and the new version counts as their approval'),
-      !edited.isError && /Version 3: edited by @rev-two/.test(deskSaid(edited)) && /\*\*Approved\.\*\*/.test(deskSaid(edited))
+      !edited.isError && /^Approved, with an edit\n\nVersion 3: edited by @rev-two/.test(deskSaid(edited))
+      && /will be published on TheIntelligenceRadar\.com in the next release/.test(deskSaid(edited))
       && gh.issues.get(s3.issue).body.includes('(the check)'), textOf(edited));
 
     // a withdrawal; someone not on the list
     const pe = await cora('prepare_contribution', VALID.evidence);
     const se = (await cora('submit_contribution', { draft_id: pe.structuredContent?.draft_id })).structuredContent ?? {};
     const w = await cora('withdraw_contribution', { id: se.id, reason: 'Sent too early.' });
-    check(t('the contributor withdraws a contribution, which closes the issue'), /Withdrawn by @cont-three/.test(deskSaid(w)) && gh.issues.get(se.issue)?.state === 'closed', textOf(w));
+    check(t('the contributor withdraws a contribution, which closes the issue'), /^Withdrawn\n\nWithdrawn by @cont-three\./.test(deskSaid(w))
+      && gh.issues.get(se.issue)?.state === 'closed', textOf(w));
     const stranger = await as({ RADAR_GITHUB_TOKEN: T.stranger });
     const sp = await stranger('prepare_contribution', VALID.review);
     const ss = await stranger('submit_contribution', { draft_id: sp.structuredContent?.draft_id });
     check(t('anyone can contribute: someone not on the list submits, the contribution goes straight to review, and they are told they join the list once it is approved'),
-      ss.structuredContent?.status === 'in-review' && /Thank you for contributing/.test(textOf(ss))
+      ss.structuredContent?.status === 'in-review' && /^> Received: your review of IR-028\n>\n> Thank you for contributing to The Intelligence Radar, @stranger\./m.test(textOf(ss))
       && /joins the list of people as a contributor/.test(textOf(ss)), textOf(ss).slice(0, 500));
+
+    // the publisher app marks a release published for the editor who runs it: `/published <release> for @editor`
+    gh.user(deskConfig.publisher_bot, 9001);
+    const marked = gh.addComment(1, deskConfig.publisher_bot, '/published 2026-12-01 for @ed-one');
+    await desk.handle('issue_comment', { action: 'created', issue: structuredClone(gh.issues.get(1)), comment: marked });
+    const published = await cora('my_contributions', { id: 'C-0001' });
+    check(t('a release the publisher app marks published, for an editor, shows as published to the contributor'),
+      published.structuredContent?.status === 'published' && textOf(published).includes('Published in release 2026-12-01'), textOf(published).slice(-400));
 
     // signing in with GitHub, from an assistant with no token
     const fresh = await as({ RADAR_GITHUB_CLIENT_ID: 'Iv23test', RADAR_CONFIG_DIR: configDir });
@@ -703,6 +720,11 @@ async function githubFlow() {
     const out = await fresh('sign_in_with_github', { sign_out: true });
     check(t('sign_out removes the sign-in from this computer'), !existsSync(saved) && /Signed out/.test(textOf(out)), textOf(out));
     check(t('no tool output carries a GitHub token'), Object.keys(TOKENS).every((tok) => said.every((x) => !x.includes(tok))));
+    // the review desk's messages on the issues are cards made for GitHub, with a header image and a footer
+    const cards = gh.comments.filter((c) => c.user.login === BOT && c.body.includes('message-header.png') && /^<sub>.*<\/sub>$/m.test(c.body));
+    check(t('the header image and footer of the review desk\'s cards never reach the tool output'),
+      cards.length >= 10 && said.every((x) => !/<img\b|message-header\.png|<\/?sub>|\[Your contributions\]|\[How contributions work\]/.test(x)),
+      `${cards.length} cards on the issues; ${said.find((x) => /<img\b|<\/?sub>/.test(x))?.slice(0, 300) ?? ''}`);
   } finally {
     await Promise.all(clients.map((c) => c.close().catch(() => {})));
     server.closeAllConnections?.();
