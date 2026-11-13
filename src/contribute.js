@@ -7,7 +7,7 @@ import * as z from 'zod/v4';
 import * as L from './contribution.js';
 import { R, byId, dimensionByNumber, findDimension, findEntry, findSector, sectors } from './data.js';
 import { contributionState, eventsOf, hasApproved, waitingFor } from './desk-state.js';
-import { GitHubError, api, finishSignIn, hideToken, identify, pages, signOut, startSignIn } from './github.js';
+import { GitHubError, SingleSignOnError, api, finishSignIn, hideToken, identify, pages, signOut, startSignIn } from './github.js';
 
 const C = R.community;
 const FORMS = C.forms;
@@ -353,7 +353,7 @@ const answered = (said) => (said ? ['', 'The review desk answered on the issue:'
 
 const notConnected = (gh) => `${gh.problem ? `${gh.problem} ` : ''}This assistant is not connected to a GitHub account.`;
 const howToConnect = (gh) => (gh.clientId
-  ? 'To connect it, call sign_in_with_github: the person enters a short code at github.com/login/device, once.'
+  ? 'To connect it, call sign_in_with_github: once, the person enters a short code at github.com/login/device, in the browser where they use GitHub.'
   : `To connect it, set RADAR_GITHUB_TOKEN in this server's settings to a GitHub token that can open issues and comment on ${FORMS.repo}.`);
 
 function githubRoute(gh, payload) {
@@ -509,7 +509,8 @@ function contributorTools(server, gh, grant) {
   server.registerTool('sign_in_with_github', {
     title: 'Sign in with GitHub',
     description: 'Connect this assistant to the person\'s GitHub account, so that contributions and reviews go to GitHub from their account. The first call returns a '
-      + 'short code and an address: ask the person to open the address and enter the code, then call this again to finish. The sign-in is kept on this computer. '
+      + 'short code and an address: ask the person to open the address in the browser they normally use for GitHub and enter the code themselves, then call this '
+      + 'again to finish. The sign-in is kept on this computer. '
       + 'With sign_out true, it removes the sign-in.',
     inputSchema: z.object({ sign_out: z.boolean().optional().describe('Remove the sign-in kept on this computer') }),
     annotations: SIGN,
@@ -523,7 +524,18 @@ function contributorTools(server, gh, grant) {
     if (gh.source === 'env') return reply(gh, `RADAR_GITHUB_TOKEN is set${gh.login ? ` (for @${gh.login})` : ''}, and it is used instead of signing in.`, { connected: Boolean(gh.login), login: gh.login });
     if (!gh.clientId) return fail(gh, ['Signing in with GitHub is not set up in this edition yet.', howToConnect(gh)]);
     if (flow && Date.now() < flow.expires_at) {
-      const outcome = await finishSignIn(gh, flow, gh.wait);
+      let outcome;
+      try {
+        outcome = await finishSignIn(gh, flow, gh.wait);
+      } catch (err) {
+        if (!(err instanceof SingleSignOnError)) throw err;
+        // GitHub gave a token that the organisation's single sign-on refuses: keep nothing, and say how to sign in so that it counts
+        flow = null;
+        const who = gh.login;
+        signOut(gh);
+        return reply(gh, [`GitHub refused the sign-in${who ? ` of @${who}` : ''} for ${gh.repo}.`, '', err.message, '',
+          'The refused sign-in is removed from this computer.'], { connected: false, single_sign_on: true, ...(who ? { login: who } : {}) }, true);
+      }
       if (outcome === 'done') {
         flow = null;
         grant(gh.role);
@@ -533,14 +545,17 @@ function contributorTools(server, gh, grant) {
         { connected: true, login: gh.login, role: gh.role });
       }
       if (outcome === 'waiting') {
-        return reply(gh, [`Still waiting. Ask the person to open ${flow.verification_uri} and enter the code ${flow.user_code}, then call sign_in_with_github again.`],
+        return reply(gh, [`Still waiting. Ask the person to open ${flow.verification_uri} in the browser they normally use for GitHub and enter the code ${flow.user_code}, `
+          + 'then call sign_in_with_github again.'],
           { connected: false, user_code: flow.user_code, verification_uri: flow.verification_uri });
       }
       flow = null;
       if (outcome === 'denied') return fail(gh, 'The person declined the sign-in on GitHub. Call sign_in_with_github again to start over.');
     }
     flow = await startSignIn(gh);
-    return reply(gh, [`Ask the person to open ${flow.verification_uri} and enter this code: **${flow.user_code}**`, '',
+    return reply(gh, [`Ask the person to open ${flow.verification_uri} in the browser they normally use for GitHub, and enter this code: **${flow.user_code}**`, '',
+      'Give them the link and the code to enter themselves. If their GitHub organisation uses single sign-on, it has to be the browser where that single sign-on '
+        + 'is active: a code approved in another browser, such as an assistant\'s own browser, signs them in without it, and GitHub then refuses their contributions.', '',
       'GitHub then asks them to authorise The Intelligence Radar to open issues and comment in the contributions repository on their behalf. '
         + 'Once they have, call sign_in_with_github again to finish. The code expires in 15 minutes.'],
     { connected: false, user_code: flow.user_code, verification_uri: flow.verification_uri });

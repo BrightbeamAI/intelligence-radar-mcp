@@ -692,7 +692,7 @@ Intelligence labels: Use: Ready to use under the stated conditions, with normal 
 
 Enterprise labels: Revisit: Recent evidence or delivery experience challenges a decision or practice that many organisations already have. Re-examine it now; Test: Commit an owner and a budget to a measured test on your own work in the coming quarter; Plan for: A change is arriving or already under way. Build the organisational capacity to absorb it: skills, contracts, policy, data and controls; Watch: No commitment yet. Follow the developments its entry describes and look again in the next edition.
 
-> Figure. Where the two scales pull apart. Intelligence labels against enterprise labels, with the number of entries in each cell: Use and Revisit: 12; Use and Test: 10; Use and Plan for: 2; Use and Watch: 0; Trial and Revisit: 2; Trial and Test: 32; Trial and Plan for: 0; Trial and Watch: 3; Evaluate and Revisit: 3; Evaluate and Test: 4; Evaluate and Plan for: 4; Evaluate and Watch: 12; Wait and Revisit: 2; Wait and Test: 0; Wait and Plan for: 1; Wait and Watch: 2; Prepare and Revisit: 2; Prepare and Test: 0; Prepare and Plan for: 12; Prepare and Watch: 0.
+> Figure. Where the two scales pull apart. Intelligence labels against enterprise labels, with the number of entries in each cell: Use and Revisit: 12; Use and Test: 10; Use and Plan for: 2; Use and Watch: 0; Trial and Revisit: 2; Trial and Test: 34; Trial and Plan for: 0; Trial and Watch: 3; Evaluate and Revisit: 3; Evaluate and Test: 4; Evaluate and Plan for: 4; Evaluate and Watch: 15; Wait and Revisit: 2; Wait and Test: 0; Wait and Plan for: 1; Wait and Watch: 2; Prepare and Revisit: 2; Prepare and Test: 0; Prepare and Plan for: 12; Prepare and Watch: 0.
 
 - Use and Revisit: The technology is ready, and common practice lags behind it. Example: IR-037 Agent identities and least privilege.
 - Wait and Revisit: Stop relying on the claim or practice until the evidence arrives. Example: IR-084 Organisation-wide productivity claims.
@@ -802,6 +802,20 @@ Organisations that host models can trade numerical precision for memory and thro
 - Evidence: [168]; Practitioner view.
 - Owner: Technical architecture lead
 
+#### IR-105 · Hybrid attention architectures · Intelligence: Trial · Enterprise: Test
+
+Several widely used open-weight model families have moved away from the pure transformer. Most of their sequence layers keep a fixed-size recurrent state (state-space or linear attention) and a minority keep full attention: Qwen3.5 uses three Gated DeltaNet layers per attention layer [282], Nvidia's Nemotron 3 family interleaves mostly Mamba-2 and mixture-of-experts layers with a few attention layers [283], and IBM's Granite 4.0-H models use nine Mamba-2 blocks per transformer block [284]. The design cuts the memory that grows with context: Moonshot reports that Kimi Linear, against the same model with full attention, uses up to 75% less key-value cache and decodes up to six times faster at a million tokens [285]. Organisations that self-host open weights may already be running one.
+
+The differences show up in operations more than in the chat window. vLLM now serves hybrids as first-class models [286], but output can differ between cached and fresh runs under concurrent load, because the linear-attention backends lack vLLM's batch-invariant mode [287], and prefix caching for these layers is described as experimental [288]. Recurrent layers also compress the past: a 2026 study of small models on synthetic tasks found that hybrids matched or beat transformers at retrieving content and trailed them at retrieving by position [289]. The enterprise posture is Test because the reported gains are large for long-context and agent workloads, and reproducibility and caching need checking before regulated or audited use.
+
+- Where it fits: Self-hosted long-context, retrieval-heavy or agent workloads where memory and throughput limit use.
+- Test before committing: On your own workload, compare a hybrid and a transformer of similar quality on long-context accuracy, position-sensitive retrieval, throughput and memory, and check whether outputs repeat between cached and fresh runs at your concurrency.
+- Failure to watch: Assuming outputs are reproducible and caches portable when the serving engine handles hybrid state differently, and missing quiet losses on exact retrieval.
+- Examples: Qwen3.5 and later; Nvidia Nemotron 3; IBM Granite 4.0-H; Moonshot Kimi Linear; AI21 Jamba; vLLM hybrid memory allocator.
+- Evidence: [282], [283], [284], [285], [286], [287], [288], [289].
+- Owner: Technical architecture lead
+- Community contribution: Proposed by Philip Black at Brightbeam through the open contribution process and approved by an editor on 13 November 2026 (contribution C-0008). Declared interests: None with the vendors named. The contributor works at Brightbeam, which manages The Intelligence Radar; neither the contributor nor Brightbeam has a relationship with the companies or projects named.
+
 #### IR-003 · Open-weight self-hosting · Intelligence: Evaluate · Enterprise: Watch
 
 Open-weight models have trailed the closed frontier by about four months on average since January 2026 on Epoch's index [207], and on one developer gateway they processed 71.5% of tokens in September [76]. At cutoff, Muse Spark Open had shipped weights under a revenue-capped licence; Mistral Large 4 weights were promised by the end of October, and Kimi K3.1 Pro weights were scheduled for 4 November with no licence announced [128, 129, 131]. Hosting your own model gives you control of data and versions, alongside responsibility for serving, patching and evaluation. Check the licence and every outside dependency before you rely on downloaded weights.
@@ -834,6 +848,34 @@ Speculative decoding and distributed serving raise throughput for large self-hos
 - Examples: Speculative decoding; distributed inference.
 - Evidence: [168]; Practitioner view.
 - Owner: Technical architecture lead
+
+#### IR-106 · Post-transformer architectures · Intelligence: Evaluate · Enterprise: Watch
+
+Several alternatives to the standard autoregressive transformer became testable in 2026, each strong on cost or speed for a narrow class of task. Two are new architectures at research scale. Pathway's BDH, a brain-inspired recurrent design [290], reasons in a latent state without writing out its working: its 150-million-parameter BDH-CQ scored 29.5% pass@2 on the public ARC-AGI-1 evaluation set, far below frontier accuracy, at $0.0007 per task, a cost Pathway computed from GPU time [291, 292]. The result is self-reported, and the replications named so far came from an adviser and investor in Pathway and from co-authors of its report [291, 292]. Mamba-3 improves pure state-space models at research scale [293]. Others change how a model generates text or what it mixes with attention. Diffusion language models produce text in parallel: Inception's Mercury 2 shipped in February 2026, billed as the first reasoning diffusion model [294], its Mercury 2.5 launch named production users in phone agents and coding tools [295], and Google released an experimental open-weight DiffusionGemma, fine-tuned from Gemma 4 [296]. Liquid AI ships models for devices that mix convolution with attention, with five chip companies as launch partners for LFM3 [297].
+
+Most of the evidence comes from the developers, state-space models remain weaker at exact retrieval in synthetic tests [289], and for the newest designs serving tools, fine-tuning recipes and evaluation suites are thinner than for standard transformers. Treat these as research to track: watch for independent results on your kind of task, and test only where speed, cost or on-device limits decide the case.
+
+- Where it fits: Narrow tasks bound by latency, cost or device limits: rule inference, fast drafting of code or text, on-device assistants.
+- Test before committing: Run the candidate and a comparable transformer on your own task set; measure accuracy, exact retrieval, latency and cost per accepted task, and check support for serving, fine-tuning and monitoring.
+- Failure to watch: Vendor benchmarks read as general capability, and dependence on a single supplier's architecture with thin tooling.
+- Examples: Pathway BDH and BDH-CQ; Mamba-3; Inception Mercury; Google DiffusionGemma; Liquid AI LFM2, LFM2.5 and LFM3.
+- Evidence: [290], [291], [292], [293], [294], [295], [296], [297], [289].
+- Owner: Technical architecture lead
+- Community contribution: Proposed by Philip Black at Brightbeam through the open contribution process and approved by an editor on 13 November 2026 (contribution C-0009). Declared interests: None with the vendors named. The contributor works at Brightbeam, which manages The Intelligence Radar, and follows BDH and related research independently; neither the contributor nor Brightbeam has a relationship with Pathway or the other companies named.
+
+#### IR-108 · Decision models · Intelligence: Evaluate · Enterprise: Watch
+
+A decision model answers typed questions about an input (yes or no, one of several named options, a score) with a probability for each answer, in a single pass and without generating text. TypeSafe AI released Jev in early access on 15 September 2026, calling it the first "System One" model [311, 312]. Within weeks Liquid AI released d1 and open weights for d1-3B [313, 314], Cloudflare released Clef and Clef-flash under Apache 2.0 [315], Amazon and Microsoft released models of their own [316, 317], and Databricks added a decision function to its platform [318]. Hosted services such as TypeSafe's bill for input tokens only [312]. Several are open language models post-trained to score options: Cloudflare, Amazon and Microsoft each built on Qwen [315, 316, 317].
+
+They suit routing, triage, approval gates and scoring inside software, alongside model routing (IR-009) and typed contracts (IR-007). The evidence is early: the newer models' benchmarks are their makers' own, and independent tests cover mainly Jev [314, 319]. In one independent test, Jev reached 97.9% accuracy on its confident calls when grading job adverts, for two cents, and made three confident errors against a limit of one; it did best when the answer was visible in the text and nothing in the text tried to steer it [319]. In a security test by Check Point, injected text flipped its verdict in 25 of 27 runs under the strongest of three attacks [320]. A bounded output gives no security boundary, and a calibrated probability is only as good as the evaluation behind it. Watch the category, and test one bounded decision against your current classifier or language model.
+
+- Where it fits: High-volume bounded decisions inside software, such as routing, triage, approval gates, scoring and moderation, where the possible answers are known before the call.
+- Test before committing: Take one bounded decision with labelled history; compare the decision model with your current classifier or language model on accuracy, calibration of confident calls, adversarial inputs and cost per correct decision.
+- Failure to watch: Confident wrong answers passed straight to action, injected text changing the verdict, and a moving model alias changing behaviour behind fixed thresholds.
+- Examples: TypeSafe Jev; Liquid AI d1 and d1-ultra; Cloudflare Clef and Clef-flash; AWS Strands Decider 2B; Microsoft-Decision-1; Databricks ai_decide.
+- Evidence: [311], [312], [313], [314], [315], [316], [317], [318], [319], [320].
+- Owner: Technical architecture lead
+- Community contribution: Proposed by Philip Black at Brightbeam through the open contribution process and approved by an editor on 13 November 2026 (contribution C-0011). Declared interests: None with the vendors named. The contributor works at Brightbeam, which manages The Intelligence Radar; neither the contributor nor Brightbeam has a relationship with the companies named.
 
 ### Dimension 2. Knowledge, context and expertise (Context)
 
@@ -1522,6 +1564,20 @@ Models that turn vision and language into physical action are improving, and dep
 - Evidence: [106], [107]; Practitioner view.
 - Owner: Domain and data science lead
 
+#### IR-107 · World models · Intelligence: Evaluate · Enterprise: Watch
+
+A world model learns how an environment changes, so it can predict or generate what happens next when something acts in it. Two families matter. Generative world models render the next frames: Google DeepMind's Genie 4, announced on 27 October 2026, is open to a limited group of trusted testers [298, 299], and Waymo built its Waymo World Model on Genie 3 to simulate situations its fleet has never observed [300]. Nvidia's open Cosmos 3 combines world generation, vision reasoning and action prediction [301]. Joint-embedding predictive architectures (JEPA) predict abstract representations in place of pixels: Meta's V-JEPA 2 planned pick-and-place on robot arms after post-training on under 62 hours of robot video [302], V-JEPA 2.1 reported a 20-point gain in real-robot grasping success over its predecessor [303], and Yann LeCun's AMI Labs raised $1.03 billion in March 2026 to build JEPA world models for industrial, robotic and healthcare use, with no product yet [304]. World Labs offers Marble, which generates explorable 3D worlds, through a paid public API [305].
+
+In manufacturing, the nearest use is synthetic data. Nvidia reports that Pegatron cut deployment time for visual inspection models by 67% with defect images generated in Cosmos and Isaac Sim [306], and that Wistron improved defect detection accuracy by 5% to 20% [307]; such results are largely vendor-reported [308]. Physics is the weak point: one diagnostic benchmark found every video model it tested, earlier Cosmos versions included, short of the physical consistency that reliable real-world interaction needs, and another found physical understanding severely limited and unrelated to visual realism [309, 310]. Neither tested Genie 4 or Cosmos 3. Use world models as data generators checked against real measurements, and keep them out of planning and control until fidelity is shown for your process (IR-068, IR-071).
+
+- Where it fits: Robotics, autonomous systems, inspection and training-data generation where real examples are rare, costly or hazardous to collect.
+- Test before committing: Train on real plus generated data and compare with real data alone on held-out real cases; measure in generated output the physical quantities that matter for your process.
+- Failure to watch: Visually convincing output trusted as physically accurate, and synthetic data that teaches a model the generator's errors.
+- Examples: Google DeepMind Genie 3 and 4; Nvidia Cosmos 3; Meta V-JEPA 2 and 2.1; AMI Labs; World Labs Marble; Waymo World Model.
+- Evidence: [298], [299], [300], [301], [302], [303], [304], [305], [306], [307], [308], [309], [310].
+- Owner: Domain and data science lead
+- Community contribution: Proposed by Philip Black at Brightbeam through the open contribution process and approved by an editor on 13 November 2026 (contribution C-0010). Declared interests: None with the vendors named. The contributor works at Brightbeam, which manages The Intelligence Radar; neither the contributor nor Brightbeam has a relationship with the companies named.
+
 #### IR-072 · Unconstrained physical autonomy · Intelligence: Wait · Enterprise: Watch
 
 Keep open-world physical action out of deployment until the safety case matches the operating environment. People, equipment and materials can be harmed by unbounded action, and physical harm cannot be undone like a software change. Require domain-specific validation, safe stops and independent incident review before deployment.
@@ -1826,6 +1882,20 @@ Speed and accuracy can diverge at the endpoint: Artificial Analysis found the sa
 - Evidence: [214], [215], [216], [217], [218], [219], [220].
 - Owner: Infrastructure and platform lead
 
+#### IR-104 · Apple Silicon for on-device and building-local inference · Intelligence: Trial · Enterprise: Test
+
+Use Apple Silicon as a two-level edge where work must continue without a network and data must stay on site: phones for capture and short tasks, and Macs in the building for larger models and shared services. On the phone, Apple's Foundation Models framework gives apps a small on-device model at no per-call cost and can route harder tasks to Private Cloud Compute or to another provider, which takes the data off the device; the strongest on-device model needs a recent device with 12 GB of memory [273, 274]. Core AI, announced in June 2026 as the successor to Core ML, runs an organisation's own converted or open models inside apps [274, 275]. In the building, Mac minis and Mac Studios run open-weight models through MLX, LM Studio or Ollama, whose MLX engine has been in preview since March 2026 [276]. Memory capacity decides which models load, and memory bandwidth decides how fast they run. The M5 Ultra offers up to 512 GB at 1.2 TB/s [277]; in an independent single-stream test on a 27-billion-parameter model at 4-bit, it generated tokens about twice as fast as an M4 Max and almost four times as fast as an Nvidia DGX Spark [278]. M5 Pro Mac minis can be clustered over Thunderbolt 5; the M6 Mac mini has Thunderbolt 4 and tops out at 32 GB [279, 280].
+
+On token price alone, local generation costs more than a hosted API: one published calculation put it at €1.70 to €2.70 per million output tokens at constant full load, against a list price of $0.47 [281]. Justify it on continuity, data residency and latency. Phone fleets and building Macs need management, patching and defined support periods like any other site system, and a product sold with AI running in it is a product with digital elements under the Cyber Resilience Act, as the manufacturing lens on IR-070 sets out [268]. Treat local models as untrusted code (IR-070) and check licences before relying on downloaded weights (IR-003). The enterprise posture is Test because Core AI and the routing additions shipped in autumn 2026 and few deployments have run long enough to show their operating cost.
+
+- Where it fits: Sites with poor or controlled connectivity and data that must stay on premises, such as regulated manufacturing, laboratories, clinics and field work, where phones handle capture and Macs in the building serve shared models.
+- Test before committing: In one building and one workflow, test offline behaviour, sync and conflict handling, on-device accuracy against a hosted model on the same task, device management and update cadence, and cost per accepted task including hardware and support.
+- Failure to watch: Phones below the memory threshold, building Macs that nobody owns, automatic routing to the cloud that sends data off site unnoticed, and models left out of date.
+- Examples: iPhone with Apple Foundation Models and Core AI; Mac mini and Mac Studio (M5 Pro, M5 Max, M5 Ultra); MLX and mlx-lm; LM Studio; Ollama; Thunderbolt 5 clustering with exo.
+- Evidence: [273], [274], [275], [276], [277], [278], [279], [280], [281], [268].
+- Owner: Infrastructure and platform lead
+- Community contribution: Proposed by Philip Black at Brightbeam through the open contribution process and approved by an editor on 9 November 2026 (contribution C-0003). Declared interests: Brightbeam, which manages The Intelligence Radar, is developing a product that runs inference on iPhones and building-local Macs. The product is in client trials. Brightbeam works with Apple on it informally; there is no formal partnership. The contributor leads this work.
+
 #### IR-094 · Compute capacity, energy and location · Intelligence: Evaluate · Enterprise: Watch
 
 Plan infrastructure around measured demand, availability and local constraints. In the United States, a capacity auction cleared short of its reliability requirement [43]. Oracle served a force majeure notice on a Stargate campus in New Mexico after state officials refused rights of way for its gas supply [231]. In Ireland, data centres used about 23% of metered electricity in 2025, and new data centres of 10 MVA or more must now bring matching dispatchable generation or storage [44, 45]; most adults there want building stopped for now [46]. Data-centre electricity figures include demand unrelated to AI. Treat permission, power and community terms as delivery risks with their own timelines when choosing regions and providers.
@@ -2010,7 +2080,7 @@ Placed differently here:
 Hold back:
 - IR-071 Robotics and vision-language-action systems: Keep self-learning models out of safety functions: from 20 January 2027, machinery whose safety functions rely on self-evolving machine learning needs a notified body's assessment. [267]
 
-Entries that matter most here: IR-004, IR-016, IR-022, IR-042, IR-045, IR-053, IR-061, IR-063, IR-064, IR-065, IR-066, IR-068, IR-070, IR-071, IR-072, IR-077, IR-085, IR-086, IR-090, IR-093, IR-096.
+Entries that matter most here: IR-004, IR-016, IR-022, IR-042, IR-045, IR-053, IR-061, IR-063, IR-064, IR-065, IR-066, IR-068, IR-070, IR-071, IR-072, IR-077, IR-085, IR-086, IR-090, IR-093, IR-096, IR-104, IR-107.
 
 ### The sector lens: Public services (Benefits, services and public bodies)
 
@@ -2047,7 +2117,7 @@ Selection. For the themes and the account of the period, the editors asked of ev
 
 Labels. Evidence layers distinguish Measured, Documented, Demonstrated, Reported, Proposed and Opinion. These describe the type of evidence. A measured result may still be vendor-reported, narrowly sampled or unreplicated. Every catalogue entry carries an intelligence label (Use, Trial, Evaluate, Wait or Prepare) and an enterprise label (Revisit, Test, Plan for or Watch). The enterprise judgements on the Enterprise track each carry a condition, the evidence, an action, a trade-off and a trigger to review them.
 
-The catalogue. The research team proposes each placement. Practitioners challenge the placements, and specialists check the material claims and labels. Entries that cite Brightbeam's work say so.
+The catalogue. The research team proposes placements, and anyone can propose an entry or a change through the open contribution process, where the editors and specialist reviewers decide. Practitioners challenge the placements, and specialists check the material claims and labels. Entries that cite Brightbeam's work say so, and an entry that a contributor proposed credits them on its page.
 
 Corrections. Corrections will be recorded with their effect on any conclusion.
 
@@ -2333,3 +2403,51 @@ One register serves all of The Intelligence Radar. Kinds of source and the scope
 270. EUR-Lex, Directive (EU) 2016/2102 on the accessibility of the websites and mobile applications of public sector bodies: Articles 4 and 12 (26 October 2016). https://eur-lex.europa.eu/eli/dir/2016/2102/oj (Official document)
 271. EUR-Lex, Regulation (EU) 2026/1744, the Digital Omnibus on AI: Article 1(39) to (41), amending Articles 111 and 113 and Annex I of the AI Act, and Article 3, amending the Machinery Regulation (8 July 2026). https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=OJ:L_202601744 (Official document)
 272. EMA, Multistakeholder workshop on expert contributions to AI guidance development (Annex 22), 30 June and 1 July 2026, with its report (2 October 2026). https://www.ema.europa.eu/en/events/good-manufacturing-practice-multistakeholder-workshop-expert-contributions-artificial-intelligence-guidance-development-annex-22 (Official document)
+273. Implicator, Apple expands Xcode and Foundation Models for WWDC AI developers (8 June 2026). https://www.implicator.ai/apple-expands-xcode-and-foundation-models-for-wwdc-ai-developers/ (News report)
+274. Callstack, On-device AI after WWDC 2026: what's new? (8 June 2026). https://www.callstack.com/blog/on-device-ai-after-wwdc-2026-whats-new (Organisation publication)
+275. InfoQ, Apple launches Core AI for Apple-Silicon optimized on-device generative AI (20 June 2026). https://www.infoq.com/news/2026/06/apple-core-ai-wwdc (News report)
+276. The New Stack, Ollama taps Apple's MLX framework to make local AI models faster on Macs (31 March 2026). https://thenewstack.io/ollama-taps-apples-mlx/ (News report)
+277. Apple Newsroom, Apple introduces M6 and M5 Ultra for a big leap in performance and AI compute (25 August 2026). https://www.apple.com/newsroom/2026/08/apple-introduces-m6-and-m5-ultra-for-a-big-leap-in-performance-and-ai-compute/ (Organisation publication)
+278. Tom's Hardware, Apple Mac Studio (M5 Ultra) review: local model citizen outpaces DGX Spark and Threadripper (21 September 2026). https://www.tomshardware.com/desktops/mini-pcs/apple-mac-studio-m5-ultra-review (News report)
+279. Apple Newsroom, Apple's new Mac mini, featuring M6 and M5 Pro, delivers a massive leap in AI performance (25 August 2026). https://www.apple.com/newsroom/2026/08/apple-unveils-a-more-powerful-mac-mini-featuring-the-all-new-m6-and-m5-pro/ (Organisation publication)
+280. MacStories, The potential of M6 and M5 Ultra for local AI on macOS (August 2026). https://www.macstories.net/notes/the-potential-of-m6-and-m5-ultra-for-local-ai-on-macos/ (News report)
+281. Context Studios, Mac Studio M5 Ultra for local AI: benchmarks, prices and a comparison with four DGX Spark (24 September 2026). https://www.contextstudios.ai/blog/mac-studio-m5-ultra-local-ai-guide (Organisation publication)
+282. Sebastian Raschka, LLM architecture gallery: hybrid attention. https://sebastianraschka.com/llm-architecture-gallery/hybrid-attention/ (Technical documentation)
+283. Nvidia, Nemotron 3: efficient and open intelligence (24 December 2025). arXiv 2512.20856. https://arxiv.org/abs/2512.20856 (Academic paper)
+284. IBM, Granite 4.0: hyper-efficient, high performance hybrid models for enterprise (2 October 2025). https://www.ibm.com/new/announcements/ibm-granite-4-0-hyper-efficient-high-performance-hybrid-models (Organisation publication)
+285. Moonshot AI, Kimi Linear: an expressive, efficient attention architecture (30 October 2025). arXiv 2510.26692. https://arxiv.org/abs/2510.26692 (Academic paper)
+286. PyTorch Foundation, Hybrid models as first-class citizens in vLLM (5 November 2025). https://pytorch.org/blog/hybrid-models-as-first-class-citizens-in-vllm/ (Technical documentation)
+287. LMCache documentation, Kimi-Linear recipe. https://docs.lmcache.ai/recipes/kimi_linear.html (Technical documentation)
+288. LMCache documentation, Qwen3.5, Qwen3.6 and Qwen3.8 series recipe. https://docs.lmcache.ai/recipes/qwen3_5.html (Technical documentation)
+289. Pantazopoulos and others, Retrievit: in-context retrieval capabilities of transformers, state space models, and hybrid architectures (Transactions on Machine Learning Research, June 2026). arXiv 2603.02874. https://arxiv.org/abs/2603.02874 (Academic paper)
+290. Kosowski and others (Pathway), The Dragon Hatchling: the missing link between the transformer and models of the brain (30 September 2025). arXiv 2509.26507. https://arxiv.org/abs/2509.26507 (Academic paper)
+291. Engdahl and others (Pathway), BDH-CQ: in-context learning with recurrent latent reasoning (10 August 2026). arXiv 2608.09888. https://arxiv.org/abs/2608.09888 (Academic paper)
+292. Pathway, a 150M-parameter model breaks the ARC-AGI-1 cost-efficiency frontier (11 August 2026). https://pathway.com/blog/pathway-150m-model-breaks-arc-agi-1-cost-efficiency-frontier (Organisation publication)
+293. Lahoti and others, Mamba-3: improved sequence modeling using state space principles (16 March 2026). arXiv 2603.15569. https://arxiv.org/abs/2603.15569 (Academic paper)
+294. The Decoder, Inception launches Mercury 2, the first diffusion-based language reasoning model (24 February 2026). https://the-decoder.com/inception-launches-mercury-2-the-first-diffusion-based-language-reasoning-model/ (News report)
+295. Inception, Introducing Mercury 2.5 (8 September 2026). https://www.inceptionlabs.ai/blog/introducing-mercury-2-5 (Organisation publication)
+296. Google DeepMind, DiffusionGemma technical report (31 July 2026). arXiv 2608.00146. https://arxiv.org/abs/2608.00146 (Academic paper)
+297. Liquid AI, Introducing LFM3: every modality for specialized intelligence (27 October 2026). https://www.liquid.ai/blog/lfm3 (Organisation publication)
+298. Google, We're announcing Genie 4, our new world model for real-time interactive simulation (27 October 2026). https://blog.google/innovation-and-ai/models-and-research/google-deepmind/introducing-genie-4/ (Organisation publication)
+299. i-SCOOP, Genie 4 shows where world models are heading, and what European organisations can do now (28 October 2026). https://www.i-scoop.eu/genie-4-world-model/ (News report)
+300. Waymo, The Waymo World Model: a new frontier for autonomous driving simulation (6 February 2026). https://waymo.com/blog/2026/02/the-waymo-world-model-a-new-frontier-for-autonomous-driving-simulation (Organisation publication)
+301. Nvidia, Cosmos 3, the open frontier foundation model for physical AI (31 May 2026). https://nvidianews.nvidia.com/news/nvidia-launches-cosmos-3-the-open-frontier-foundation-model-for-physical-ai (Organisation publication)
+302. Meta, V-JEPA 2: self-supervised video models enable understanding, prediction and planning (11 June 2025). https://ai.meta.com/research/publications/v-jepa-2-self-supervised-video-models-enable-understanding-prediction-and-planning/ (Academic paper)
+303. Mur-Labadia and others (Meta), V-JEPA 2.1: unlocking dense features in video self-supervised learning (15 March 2026). arXiv 2603.14482. https://arxiv.org/abs/2603.14482 (Academic paper)
+304. The Futurum Group, Yann LeCun's AMI raises $1BN seed round: is the world model era finally here? (13 March 2026). https://futurumgroup.com/insights/yann-lecuns-ami-raises-1bn-seed-round-is-the-world-model-era-finally-here (News report)
+305. World Labs, Announcing the World API (21 January 2026). https://worldlabs.ai/blog/announcing-the-world-api (Organisation publication)
+306. Nvidia, Pegatron scales factory operations with visual AI agents and digital twins (case study, updated 12 August 2026). https://www.nvidia.com/en-eu/case-studies/pegatron-scales-factory-operations-with-visual-ai-digital-twins/ (Organisation publication)
+307. Nvidia, Wistron accelerates and scales advanced manufacturing of AI infrastructure (case study, 21 July 2026). https://www.nvidia.com/en-us/case-studies/wistron/ (Organisation publication)
+308. The Futurum Group, Nvidia Cosmos 3 and open agent tools: is physical AI about to leave the lab? (2 June 2026). https://futurumgroup.com/insights/nvidia-cosmos-3-and-open-agent-tools-is-physical-ai-about-to-leave-the-lab/ (News report)
+309. Upadhyay and others, WorldBench: benchmarking physical understanding of world models by isolating physics concepts (29 January 2026). arXiv 2601.21282. https://arxiv.org/abs/2601.21282 (Dataset or benchmark)
+310. Motamed and others, Do generative video models understand physical principles? (WACV 2026, March 2026). https://openaccess.thecvf.com/content/WACV2026/html/Motamed_Do_Generative_Video_Models_Understand_Physical_Principles_WACV_2026_paper.html (Academic paper)
+311. TypeSafe AI, Introducing System One models and Jev (15 September 2026). https://typesafe.ai/blog/introducing-system-one-models-and-jev (Organisation publication)
+312. TypeSafe AI documentation, Models. https://docs.typesafe.ai/models (Technical documentation)
+313. Liquid AI, Introducing d1: the most capable decision model, now with vision (5 October 2026). https://www.liquid.ai/blog/d1-decision-model (Organisation publication)
+314. Liquid AI, Open d1: edge decision models for text, vision, and audio (7 October 2026). https://www.liquid.ai/blog/d1-open (Organisation publication)
+315. Cloudflare, Introducing Clef: our open-source decision models, and new RL fine-tuning platform (1 October 2026). https://blog.cloudflare.com/clef-decision-models/ (Organisation publication)
+316. Strands Agents (AWS), Introducing Strands Decider 2B: a small, open source, decision model (1 October 2026). https://strandsagents.com/blog/introducing-strands-decider/ (Organisation publication)
+317. Microsoft, Introducing Microsoft-Decision-1, our model for fast decision-making (9 October 2026). https://commandline.microsoft.com/microsoft-decision-1-model-foundry/ (Organisation publication)
+318. Databricks, Introducing ai_decide: make fast decisions on your governed data (30 September 2026). https://www.databricks.com/blog/introducing-aidecide-make-fast-decisions-your-governed-data (Organisation publication)
+319. StationX, Jev AI for cybersecurity: we tested it on real work (30 September 2026). https://app.stationx.net/articles/jev-ai-cybersecurity (Organisation publication)
+320. Check Point, A decision model breaks like any other language model: a first look at Jev (24 September 2026). https://blog.checkpoint.com/ai-security/jev-is-not-a-language-model-but-it-breaks-like-one-prompt-injection-against-a-typed-decision-model/ (Organisation publication)

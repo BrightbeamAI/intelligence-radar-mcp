@@ -17,6 +17,32 @@ const ROLES = ['contributor', 'reviewer', 'editor'];
 
 export class GitHubError extends Error {}
 
+/** GitHub's refusal when the organisation that owns the contributions repository uses single sign-on (SAML), and this sign-in or token has not been granted it. */
+export class SingleSignOnError extends GitHubError {}
+
+const orgOf = (gh) => String(gh.repo).split('/')[0];
+
+/**
+ * What to do when the organisation's single sign-on refuses the sign-in. GitHub grants a sign-in to an organisation with
+ * single sign-on only when the person approves the code in a browser where that single sign-on session is active.
+ */
+export function singleSignOnHelp(gh) {
+  const org = orgOf(gh);
+  if (gh.source === 'env') {
+    return `${org} uses single sign-on on GitHub, and the token in RADAR_GITHUB_TOKEN is not authorised for it, so GitHub refuses it there (status 403). `
+      + `Authorise the token for ${org} on GitHub (Settings, Developer settings, Personal access tokens, Configure SSO), or remove RADAR_GITHUB_TOKEN and use sign_in_with_github.`;
+  }
+  return [
+    `${org} uses single sign-on on GitHub, and this sign-in was approved without an active ${org} single sign-on session, so GitHub refuses it there (status 403). `
+      + 'That happens when the code is approved in a browser other than the one where the person uses that single sign-on, such as an assistant\'s own browser.',
+    '',
+    `To fix it, the person does this in the browser where they use ${org}'s single sign-on:`,
+    `1. Open ${gh.web}/orgs/${org}/sso and continue, to start a single sign-on session.`,
+    `2. Open ${gh.web}/settings/apps/authorizations and revoke The Intelligence Radar.`,
+    '3. Sign in again from the assistant (sign_in_with_github), and approve the new code in that same browser.',
+  ].join('\n');
+}
+
 /** A setting from the environment. MCP Bundle hosts pass "${user_config.key}" through unchanged when the person left it empty. */
 function setting(env, name) {
   const v = String(env[name] ?? '').trim();
@@ -127,10 +153,13 @@ export async function api(gh, method, path, body, { ms = TIMEOUT, auth = true } 
   let data = null;
   try { data = await res.json(); } catch { /* no JSON */ }
   if (res.ok) return data;
-  const said = data?.message ? ` GitHub said: ${data.message}.` : '';
+  const said = data?.message ? ` GitHub said: ${String(data.message).replace(/\.+$/, '')}.` : '';
   if (res.status === 401) {
     throw new GitHubError(gh.source === 'env' ? `GitHub did not accept the token in RADAR_GITHUB_TOKEN.${said} Check it, or remove it and use sign_in_with_github.`
       : `GitHub did not accept the saved sign-in.${said} Call sign_in_with_github to sign in again.`);
+  }
+  if (res.status === 403 && (/\bSAML\b/i.test(String(data?.message ?? '')) || /^required\b/i.test(res.headers.get('x-github-sso') ?? ''))) {
+    throw new SingleSignOnError(singleSignOnHelp(gh));
   }
   if (res.status === 403 || res.status === 404) {
     throw new GitHubError(`GitHub refused this (status ${res.status}).${said} The token may not be allowed to open issues or comment on ${gh.repo}: `

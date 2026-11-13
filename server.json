@@ -8,12 +8,12 @@
     "source": "github"
   },
   "websiteUrl": "https://theintelligenceradar.com/ai-tools.html",
-  "version": "2026.2.1",
+  "version": "2026.2.3",
   "packages": [
     {
       "registryType": "npm",
       "identifier": "@brightbeamai/intelligence-radar-mcp",
-      "version": "2026.2.1",
+      "version": "2026.2.3",
       "transport": {
         "type": "stdio"
       },

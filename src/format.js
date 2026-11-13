@@ -40,6 +40,9 @@ export function entryMarkdown(e) {
   const sec = sectorNotesForEntry(e);
   if (sec.length) o.push('## Sector lens', '', ...sec.map((x) => `- ${x}`), '');
   if (e.disclosure) o.push('Disclosure: this entry cites work published by Brightbeam, which manages the Radar.', '');
+  if (e.contribution) {
+    o.push(`**Community contribution:** ${e.contribution.text}${e.contribution.interests ? ` Declared interests: ${e.contribution.interests}` : ''}`, '');
+  }
   o.push('## Sources', '', ...e.sources.map((n) => sourceLine(sourceByNumber.get(n))), '', `Entry page: ${e.url}`);
   return o.join('\n');
 }

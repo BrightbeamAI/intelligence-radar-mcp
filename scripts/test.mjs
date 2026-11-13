@@ -76,6 +76,12 @@ async function run(label, options) {
   const missing = await client.callTool({ name: 'get_entry', arguments: { entry: 'quantum teleportation of spreadsheets' } });
   check(t('get_entry reports an entry it cannot find'), missing.isError === true);
   const every = await Promise.all(R.entries.map((e) => client.callTool({ name: 'get_entry', arguments: { entry: e.id } })));
+  // an entry a contributor proposed carries its credit and the interests declared, wherever it is read
+  const given = R.entries.filter((e) => e.contribution);
+  check(t('get_entry credits each entry a contributor proposed'), given.every((e) => {
+    const text = textOf(every[R.entries.indexOf(e)]);
+    return text.includes(`**Community contribution:** ${e.contribution.text}`) && (!e.contribution.interests || text.includes(e.contribution.interests));
+  }), `${given.length} entries`);
   check(t('get_entry reads all entries with their labels and sources'), every.every((r, i) => {
     const s = textOf(r);
     const e = R.entries[i];
@@ -526,7 +532,10 @@ async function githubFlow() {
     TOKENS[tok] = login;
     return tok;
   };
-  const T = { editor: person('ed-one', 101), reviewer: person('rev-two', 102), contributor: person('cont-three', 103), stranger: person('stranger', 104) };
+  const T = { editor: person('ed-one', 101), reviewer: person('rev-two', 102), contributor: person('cont-three', 103), stranger: person('stranger', 104),
+    sso: person('sso-member', 105) };
+  // a member of an organisation with single sign-on whose sign-in was approved outside a single sign-on session: GitHub refuses it in the organisation
+  const SSO_REFUSED = new Set([T.sso]);
   gh.setFile('people.json', JSON.stringify({ note: 'test', people: [
     { login: 'ed-one', id: 101, name: 'Edna Editor', role: 'editor', areas: [], since: '2026-11-07' },
     { login: 'rev-two', id: 102, name: 'Ravi Reviewer', role: 'reviewer', areas: [], since: '2026-11-07' },
@@ -535,6 +544,7 @@ async function githubFlow() {
   const desk = new Desk({ gh: new GitHub({ repo: REPO, token: 'desk', base: 'https://api.test', fetchImpl: gh.fetch }), config: deskConfig, forms: deskForms,
     now: () => new Date(gh.clock) });
   let polls = 0;
+  let grant = null; // the token the stand-in's device flow hands out; the reviewer's unless a check sets another
   const base = `/repos/${REPO}`;
   const one = new RegExp(`^${base}/issues/(\\d+)$`);
   const comments = new RegExp(`^${base}/issues/(\\d+)/comments$`);
@@ -554,9 +564,14 @@ async function githubFlow() {
       }
       if (url.pathname === '/login/oauth/access_token') {
         polls += 1;
-        return send(200, polls === 1 ? { error: 'authorization_pending' } : { access_token: T.reviewer, token_type: 'bearer', scope: '' });
+        return send(200, polls === 1 ? { error: 'authorization_pending' } : { access_token: grant ?? T.reviewer, token_type: 'bearer', scope: '' });
       }
-      const login = TOKENS[String(req.headers.authorization ?? '').replace(/^Bearer /, '')];
+      const tok = String(req.headers.authorization ?? '').replace(/^Bearer /, '');
+      const login = TOKENS[tok];
+      if (SSO_REFUSED.has(tok) && url.pathname.startsWith(base)) {
+        res.writeHead(403, { 'Content-Type': 'application/json', 'X-GitHub-SSO': `required; url=https://github.com/orgs/${REPO.split('/')[0]}/sso` });
+        return res.end(JSON.stringify({ message: 'Resource protected by organization SAML enforcement. You must grant your OAuth token access to this organization.' }));
+      }
       if (url.pathname === '/user') return login ? send(200, { login, id: gh.users.get(login).id, name: login }) : send(401, { message: 'Bad credentials' });
       if (req.method !== 'GET' && !login) return send(401, { message: 'Requires authentication' });
       const data = raw ? JSON.parse(raw) : undefined;
@@ -719,6 +734,29 @@ async function githubFlow() {
       && existsSync(saved) && ((await fs.stat(saved)).mode & 0o077) === 0, textOf(in2));
     const out = await fresh('sign_in_with_github', { sign_out: true });
     check(t('sign_out removes the sign-in from this computer'), !existsSync(saved) && /Signed out/.test(textOf(out)), textOf(out));
+
+    // single sign-on: the code goes to the browser where the person uses GitHub; a sign-in approved elsewhere is refused, said plainly, and kept nowhere
+    check(t('the code is for the browser where the person uses GitHub, and its single sign-on'),
+      /in the browser they normally use for GitHub/.test(textOf(in1)) && /single sign-on/.test(textOf(in1)) && /enter themselves/.test(textOf(in1)), textOf(in1));
+    const org = REPO.split('/')[0];
+    const fixSteps = (s) => s.includes(`/orgs/${org}/sso`) && s.includes('/settings/apps/authorizations') && /approve the new code in that same browser/.test(s);
+    const member = await as({ RADAR_GITHUB_CLIENT_ID: 'Iv23test', RADAR_CONFIG_DIR: configDir });
+    await member('sign_in_with_github');
+    polls = 0;
+    grant = T.sso;
+    const refused = await member('sign_in_with_github');
+    grant = null;
+    check(t('a sign-in that single sign-on refuses says so, gives the three steps, and keeps nothing on this computer'),
+      refused.isError === true && refused.structuredContent?.single_sign_on === true && /^GitHub refused the sign-in of @sso-member/.test(textOf(refused))
+      && new RegExp(`${org} uses single sign-on`).test(textOf(refused)) && fixSteps(textOf(refused)) && !existsSync(saved)
+      && same(await toolsOf(member), [...READING, ...CONTRIBUTOR]), textOf(refused));
+    const anew = await member('sign_in_with_github');
+    check(t('after a refusal, signing in starts again with a new code'), !anew.isError && anew.structuredContent?.user_code === 'WDJB-MJHT', textOf(anew));
+    const pat = await as({ RADAR_GITHUB_TOKEN: T.sso });
+    const patMine = await pat('my_contributions');
+    check(t('a token that single sign-on refuses: the answer says to authorise it for the organisation'),
+      patMine.isError === true && new RegExp(`${org} uses single sign-on`).test(textOf(patMine)) && /RADAR_GITHUB_TOKEN/.test(textOf(patMine))
+      && /Configure SSO/.test(textOf(patMine)) && !/GitHub refused this \(status 403\)/.test(textOf(patMine)), textOf(patMine));
     check(t('no tool output carries a GitHub token'), Object.keys(TOKENS).every((tok) => said.every((x) => !x.includes(tok))));
     // the review desk's messages on the issues are cards made for GitHub, with a header image and a footer
     const cards = gh.comments.filter((c) => c.user.login === BOT && c.body.includes('message-header.png') && /^<sub>.*<\/sub>$/m.test(c.body));

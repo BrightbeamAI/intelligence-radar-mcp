@@ -1,12 +1,12 @@
 # The Intelligence Radar MCP server
 
-![The Intelligence Radar, H2 2026: 103 entries on one radar, placed by readiness and coloured by dimension](https://raw.githubusercontent.com/BrightbeamAI/Intelligence-Radar-Contributions/main/assets/radar-wide.png)
+![The Intelligence Radar, H2 2026: 108 entries on one radar, placed by readiness and coloured by dimension](https://raw.githubusercontent.com/BrightbeamAI/Intelligence-Radar-Contributions/main/assets/radar-wide.png)
 
 [The Intelligence Radar](https://theintelligenceradar.com/) is a community-driven radar for technical leaders. This server brings it into your AI assistant for three things:
 
 | | What you can do | Who |
 |---|---|---|
-| **Read** | Search the 103 entries in nine dimensions, read the evidence, check a plan or roadmap against them, read the sector lens and see the interactive radar | Anyone. Runs on your computer, with no network needed |
+| **Read** | Search the 108 entries in nine dimensions, read the evidence, check a plan or roadmap against them, read the sector lens and see the interactive radar | Anyone. Runs on your computer, with no network needed |
 | **Contribute** | Send a review of an entry, a correction, evidence, a label change or a new entry, checked against the current edition and shown to you before anything is sent | Anyone, after signing in with GitHub from the conversation |
 | **Decide** | See the contributions waiting for you, read each one beside the entry's current text, and approve, edit, ask for changes or decline, with your reason | Specialist reviewers and editors |
 
@@ -38,7 +38,7 @@ Tools: `search_radar`, `get_entry`, `check_plan`, `get_dimension`, `get_sector`,
 - "Propose moving IR-031 to Trial, with these sources."
 - "What is the status of my contributions?"
 
-Anyone can contribute. The assistant signs you in with GitHub once (a short code at github.com/login/device), prepares the contribution, shows you exactly what will be sent and submits it only when you agree. It becomes an issue in [Intelligence-Radar-Contributions](https://github.com/BrightbeamAI/Intelligence-Radar-Contributions): within a minute, the review desk (an automated check on GitHub) confirms receipt and asks the reviewers, and the editors and specialist reviewers aim to decide within three working days, each decision with its reason. Once a contribution of yours is approved, you join the [list of people](https://github.com/BrightbeamAI/Intelligence-Radar-Contributions/blob/main/PEOPLE.md) as a contributor, unless you chose not to be credited. Without signing in, the assistant gives you a pre-filled GitHub form to check and send yourself.
+Anyone can contribute. The assistant signs you in with GitHub once (a short code you enter at github.com/login/device, in the browser where you use GitHub), prepares the contribution, shows you exactly what will be sent and submits it only when you agree. It becomes an issue in [Intelligence-Radar-Contributions](https://github.com/BrightbeamAI/Intelligence-Radar-Contributions): within a minute, the review desk (an automated check on GitHub) confirms receipt and asks the reviewers, and the editors and specialist reviewers aim to decide within three working days, each decision with its reason. Once a contribution of yours is approved, you join the [list of people](https://github.com/BrightbeamAI/Intelligence-Radar-Contributions/blob/main/PEOPLE.md) as a contributor, unless you chose not to be credited. Without signing in, the assistant gives you a pre-filled GitHub form to check and send yourself.
 
 Tools: `how_to_contribute`, `sign_in_with_github`, `prepare_contribution`, `submit_contribution`, `my_contributions`, `revise_contribution` and `withdraw_contribution`.
 
