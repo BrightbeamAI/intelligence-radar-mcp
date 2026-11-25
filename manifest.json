@@ -54,7 +54,7 @@
     },
     {
       "name": "check_plan",
-      "description": "Match a plan, roadmap or architecture against the Radar."
+      "description": "Match a plan, roadmap or architecture against The Intelligence Radar."
     },
     {
       "name": "get_sector",

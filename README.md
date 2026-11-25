@@ -55,4 +55,4 @@ Tools: `review_queue`, `open_contribution`, `decide_contribution`, `edit_contrib
 
 ## Licence
 
-Code: MIT. The Intelligence Radar's text and images: [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/), credit The Intelligence Radar, Brightbeam.
+Code: MIT. The Intelligence Radar's text and images: [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/), credit The Intelligence Radar.
