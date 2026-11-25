@@ -7,8 +7,9 @@
   --line: var(--color-border-primary, #DEDED9);
   --radius: var(--border-radius-lg, 14px);
   --ember: #EA4700;
-  --use: #1B834E; --trial: #AB6300; --evaluate: #7C3AED; --wait: #6B6560; --prepare: #2563EB;
-  --revisit: #D63C00; --test: #AB6300; --planfor: #2563EB; --watch: #6B6560;
+  /* labels carry no colour: colour shows the dimensions alone; the rings' key runs in tones of one neutral */
+  --use: #3D3B37; --trial: #6B6762; --evaluate: #9A968F; --wait: #C7C3BB; --prepare: #E4E1DA;
+  --revisit: #77736C; --test: #77736C; --planfor: #77736C; --watch: #77736C;
   --font: 'Zalando Sans', var(--font-sans, system-ui), 'Helvetica Neue', Arial, sans-serif;
   color-scheme: light;
 }
@@ -18,8 +19,8 @@
   --fg: var(--color-text-primary, #F4F3EF);
   --muted: var(--color-text-secondary, #B7B5AF);
   --line: var(--color-border-primary, #3A3B3E);
-  --use: #3DBB7A; --trial: #E39A2E; --evaluate: #A98BF5; --wait: #A8A29C; --prepare: #6F9BFF;
-  --revisit: #FF7A45; --test: #E39A2E; --planfor: #6F9BFF; --watch: #A8A29C;
+  --use: #EDEBE6; --trial: #BDBAB3; --evaluate: #8E8B85; --wait: #63615D; --prepare: #48474A;
+  --revisit: #9A968F; --test: #9A968F; --planfor: #9A968F; --watch: #9A968F;
   color-scheme: dark;
 }
 * { box-sizing: border-box; }
@@ -49,8 +50,12 @@ button, input { font: inherit; color: inherit; }
 .rv-chip { border: 1px solid var(--line); background: var(--bg); border-radius: 999px; padding: 4px 11px; font-size: 13px; line-height: 1.35; cursor: pointer; white-space: nowrap; display: inline-flex; align-items: center; gap: 6px; }
 .rv-chip i { width: 9px; height: 9px; border-radius: 50%; background: var(--dc, var(--muted)); flex: none; }
 .rv-chip[aria-pressed="true"] { background: var(--fg); border-color: var(--fg); color: var(--bg); }
-.rv-chip.t { color: var(--c); border-color: color-mix(in srgb, var(--c) 45%, transparent); font-weight: 600; }
-.rv-chip.t[aria-pressed="true"] { background: var(--c); border-color: var(--c); color: #fff; }
+.rv-chip.t { font-weight: 600; }
+.rv-chip.t[aria-pressed="true"] { background: var(--fg); border-color: var(--fg); color: var(--bg); }
+.rv-bd { display: inline-grid; place-items: center; flex: none; width: 17px; height: 17px; border-radius: 50%; font-size: 9.5px; font-weight: 800; font-style: normal;
+  box-shadow: inset 0 0 0 1.5px var(--revisit); }
+.rv-chip .rv-bd { width: 17px; height: 17px; background: none; }
+.rv-chip[aria-pressed="true"] .rv-bd { box-shadow: inset 0 0 0 1.5px currentColor; }
 .rv-secs { align-items: center; }
 .rv-sec-l { font-size: 12.5px; color: var(--muted); margin-right: 2px; }
 .rv-chip.s { font-weight: 600; border-style: dashed; border-color: var(--fg); }
@@ -92,8 +97,8 @@ button, input { font: inherit; color: inherit; }
 .rv-id { font-size: 13px; color: var(--muted); display: flex; align-items: center; gap: 7px; }
 .rv-id i { width: 10px; height: 10px; border-radius: 50%; background: var(--dc); }
 .rv-labels { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 10px; }
-.rv-label { border-radius: 8px; padding: 4px 9px; font-size: 13px; line-height: 1.3; background: color-mix(in srgb, var(--c) 12%, var(--bg)); color: var(--fg); border: 1px solid color-mix(in srgb, var(--c) 40%, transparent); }
-.rv-label b { color: var(--c); font-weight: 650; }
+.rv-label { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; border-radius: 8px; padding: 4px 9px; font-size: 13px; line-height: 1.3; background: var(--bg2); color: var(--fg); border: 1px solid var(--line); }
+.rv-label b { color: var(--fg); font-weight: 650; }
 .rv-label span { color: var(--muted); }
 .rv-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
 .rv-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 13px; color: var(--muted); }

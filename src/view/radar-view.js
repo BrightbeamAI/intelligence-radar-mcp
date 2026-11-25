@@ -12,9 +12,12 @@ const byId = new Map(E.map((e) => [e.id, e]));
 const D = new Map(DATA.dimensions.map((d) => [d.number, d]));
 const TECH = DATA.labels.intelligence.map((l) => l.name);
 const ENT = DATA.labels.enterprise.map((l) => l.name);
+const ENT_SET = new Set(ENT);
 const MEANING = Object.fromEntries([...DATA.labels.intelligence, ...DATA.labels.enterprise].map((l) => [l.name, l.short]));
 const CVAR = { Use: 'use', Trial: 'trial', Evaluate: 'evaluate', Wait: 'wait', Prepare: 'prepare', Revisit: 'revisit', Test: 'test', 'Plan for': 'planfor', Watch: 'watch' };
 const c = (label) => `var(--${CVAR[label]})`;
+// an enterprise label is shown with its badge, the letter the radar draws beside each point
+const badge = (label) => (ENT_SET.has(label) ? `<i class="rv-bd" aria-hidden="true">${esc(label.charAt(0))}</i>` : '');
 
 const SECTORS = DATA.sectors || [];
 const SEC = new Map(SECTORS.map((x) => [x.slug, x]));
@@ -52,8 +55,8 @@ function chips() {
   dom.innerHTML = `<button type="button" class="rv-chip" data-dimension="0">All dimensions</button>`
     + DATA.dimensions.map((d) => `<button type="button" class="rv-chip" data-dimension="${d.number}" style="--dc:${d.colour}" title="${esc(d.question)}">`
       + `<i></i>${String(d.number).padStart(2, '0')} ${esc(d.short)}</button>`).join('');
-  $('#rv-tech').innerHTML = TECH.map((t) => `<button type="button" class="rv-chip t" data-tech="${esc(t)}" style="--c:${c(t)}" title="${esc(MEANING[t])}">${esc(t)}</button>`).join('');
-  $('#rv-ent').innerHTML = ENT.map((t) => `<button type="button" class="rv-chip t" data-ent="${esc(t)}" style="--c:${c(t)}" title="${esc(MEANING[t])}">${esc(t)}</button>`).join('');
+  $('#rv-tech').innerHTML = TECH.map((t) => `<button type="button" class="rv-chip t" data-tech="${esc(t)}" title="${esc(MEANING[t])}">${esc(t)}</button>`).join('');
+  $('#rv-ent').innerHTML = ENT.map((t) => `<button type="button" class="rv-chip t" data-ent="${esc(t)}" title="${esc(MEANING[t])}">${badge(t)}${esc(t)}</button>`).join('');
   const sg = $('#rv-sec');
   sg.hidden = !SECTORS.length;
   sg.innerHTML = SECTORS.length ? '<span class="rv-sec-l">Sector lens</span>' + SECTORS.map((x) => `<button type="button" class="rv-chip s" data-sec="${esc(x.slug)}" `
@@ -144,7 +147,7 @@ function paint() {
 }
 
 // ------------------------------------------------------------------ the entry and the list
-const labelChip = (kind, l) => `<span class="rv-label" style="--c:${c(l)}">${kind} <b>${esc(l)}</b> <span>${esc(MEANING[l])}</span></span>`;
+const labelChip = (kind, l) => `<span class="rv-label">${kind} ${badge(l)}<b>${esc(l)}</b> <span>${esc(MEANING[l])}</span></span>`;
 const item = (e) => {
   const d = D.get(e.dimension);
   return `<li><button type="button" class="rv-item${S.hot.has(e.id) ? ' is-hot' : ''}" data-select="${e.id}" style="--dc:${d.colour}">`
