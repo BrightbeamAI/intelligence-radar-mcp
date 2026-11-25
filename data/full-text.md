@@ -20,9 +20,9 @@ edition_period: "H2 2026"
 
 The Intelligence Radar is a community-driven radar for technical leaders. It tracks the models, agents, knowledge, controls and practices that put digital intelligence to work. It originated in Ireland and is written for technical leaders everywhere: its evidence is international, and its judgements apply wherever the stated conditions are met. Its entries sit across connected dimensions. Each carries an intelligence label, for readiness under the stated conditions, and an enterprise label, for the action an organisation should take now. Every judgement states its conditions, a test to run before committing, the failure to watch for and the evidence behind it.
 
-**Community-driven.** Partner organisations, practitioners and researchers propose entries, bring evidence, challenge placements and review the dimensions they know best, and Brightbeam manages the editorial process. It draws on open research, open-source software and the practitioners who share what worked and what failed, and offers a careful, sourced account of a field that is difficult for any one team to follow in full. Anyone may read, share and adapt it under the Creative Commons Attribution 4.0 licence, with credit to The Intelligence Radar.
+**Community-driven.** Anyone may contribute. Practitioners, researchers and partner organisations propose entries, bring evidence, challenge placements and review the dimensions they know best, and every decision is published with its reasons. Brightbeam founded The Intelligence Radar and manages it as steward for the community. It draws on open research, open-source software and the practitioners who share what worked and what failed, and offers a careful, sourced account of a field that is difficult for any one team to follow in full. Anyone may read, share and adapt it under the Creative Commons Attribution 4.0 licence (CC BY 4.0), with credit to The Intelligence Radar as a community work.
 
-**How each edition is made.** Each edition starts from what practitioners and partners have read, tested and seen in their work, gathered in a discussion and research forum. The research team turns that discussion, published research and a structured review of public evidence into proposed placements. Practitioners then challenge the placements, and specialists check the material claims.
+**How each edition is made.** Each edition starts from what practitioners and partners have read, tested and seen in their work, gathered in a discussion and research forum. The editors turn that discussion, contributions, published research and a structured review of public evidence into proposed placements. Contributors then challenge the placements, and specialist reviewers check the material claims.
 
 **What guides the judgements.**
 
@@ -30,6 +30,7 @@ The Intelligence Radar is a community-driven radar for technical leaders. It tra
 - Distinguish capability, use, delegation, accepted work and value. Each needs its own evidence.
 - Keep the conditions attached to every judgement. A label quoted without its conditions misstates the judgement.
 - Show the status of the evidence: what was measured, documented, demonstrated, reported, proposed or argued.
+- Assess open standards, open-source implementations and proprietary options against the same standard of evidence.
 - Count the cost of an accepted outcome, including review, rework and failure.
 
 <!-- PAGE BREAK -->
@@ -247,7 +248,7 @@ Capability rose incrementally at the frontier. On the Epoch Capabilities Index t
 
 **Explain this: Why scores need their harness named**
 
-Benchmarks now saturate or change method within weeks, and the harness around a model can move its score by tens of points. ARC Prize verified GPT-6 Astra at 62.7% on ARC-AGI-3 with its standard harness and at 98.6% to 99.9% with a provider adapter that keeps OpenAI's reasoning state between requests; ARC reports the two conditions separately, and the comparability of the adapter score is disputed [61, 153]. Treat a score without a named harness and test-set provenance as insufficient for a deployment decision. Epoch estimates that open-weight models have trailed the closed frontier by about four months on average since January 2026 [207].
+Benchmarks now saturate or change method within weeks, and a harness can move a model's score by tens of points. ARC Prize verified GPT-6 Astra at 62.7% on ARC-AGI-3 with its standard harness and at 98.6% to 99.9% with a provider adapter that keeps OpenAI's reasoning state between requests; ARC reports the two conditions separately, and the comparability of the adapter score is disputed [61, 153]. Treat a score without a named harness and test-set provenance as insufficient for a deployment decision. Epoch estimates that open-weight models have trailed the closed frontier by about four months on average since January 2026 [207].
 
 **Show me the evidence: Indices, benchmarks and releases**
 
@@ -424,9 +425,9 @@ The catalogue holds every entry. The entries below are the ones whose evidence m
 - IR-092 EU and national regulatory readiness · Intelligence: Prepare · Enterprise: Plan for. The AI Office sent its first requests, EN 18286 was cited in the Official Journal and Irish courts issued directions on AI-assisted documents [12, 50, 54, 55].
 - IR-048 High-stakes autonomous decisions · Intelligence: Wait · Enterprise: Revisit. A review of 1,357 FDA-cleared or approved AI devices through December 2025 identified patient-outcome evaluation for just 3 [94].
 
-Most of these choices concern the parts around the model: the gate, the memory and the tools. The figure shows what The Intelligence Radar means by an agent.
+Most of these choices concern the parts around the model: memory, tools, the gate and the harness that runs them. The figure shows what The Intelligence Radar means by an agent.
 
-> Figure. What The Intelligence Radar means by an agent. The figure shows a foundation model (the cube) joined to memory (left), tools (right) and a gate (below). Memory spans procedural, episodic, semantic and tacit layers, held inside the model and in external stores, and is distinct from logs. Tools are the APIs, applications and actions the agent can reach. The gate checks identity, policy and guardrails on every call.
+> Figure. What The Intelligence Radar means by an agent. The figure shows the four components of an AI agent: the model (the cube), the cognitive core, which makes each decision; memory (left), which holds what it knows and what it has done; tools (right), the means through which it acts; and the gate (below), which sets the limits of what it may do and enforces them on every consequential action. The arrows around the model stand for the harness, the operational software that connects the components and runs them in a loop. Memory spans procedural, episodic, semantic and tacit layers, held inside the model and in external stores, and is distinct from logs.
 
 > **The editors' view.** Choose the right instrument for each decision. Classifiers, solvers and causal methods often beat a language model for prediction and planning, with the language model as interface and orchestrator. Treat models as replaceable parts, and treat the ability to evaluate and replace them as the lasting asset.
 
@@ -971,13 +972,13 @@ Some questions require linked information: which suppliers feed this assembly, w
 
 #### IR-020 · Expertise and tacit knowledge capture · Intelligence: Evaluate · Enterprise: Test
 
-The judgement needed for difficult cases often remains with experts: a cue that something is wrong, or an exception the procedure omits. Capturing it means recording the situation, the origin and the exceptions with each piece of advice, then testing whether another practitioner can use it well. A recorded statement still needs validation before others rely on it. The test is practical: compare decisions made with and without reviewed knowledge.
+The judgement needed for difficult cases often remains with experts: a cue that something is wrong, or an exception the procedure omits [321]. Capturing it means recording the situation, the origin and the exceptions with each piece of advice, then testing whether another practitioner can use it well. A recorded statement still needs validation before others rely on it. The test is practical: compare decisions made with and without reviewed knowledge.
 
 - Where it fits: Expert-dependent work where documents omit crucial decision context.
 - Test before committing: Compare novice decisions with and without reviewed knowledge fragments.
 - Failure to watch: A recorded opinion treated as validated knowledge.
-- Examples: Critical decision interviews; knowledge audits; expert-knowledge stores that keep each piece of advice with its source and conditions.
-- Evidence: [144], [145].
+- Examples: Critical decision interviews [321]; knowledge audits; expert-knowledge stores that keep each piece of advice with its source and conditions.
+- Evidence: [144], [145], [321].
 - Owner: Knowledge and data owner
 - Disclosure: This entry cites work published by Brightbeam, which manages The Intelligence Radar.
 
@@ -1329,7 +1330,7 @@ Build a representative, versioned examination of the work you intend to delegate
 
 #### IR-050 · Model-and-harness evaluation · Intelligence: Use · Enterprise: Test
 
-Evaluate the complete configuration: model, prompts, tools, memory, policies and runtime. The harness around a model can move its score by tens of points: ARC Prize verified one model at 62.7% with its standard harness and up to 99.9% with its maker's adapter, though whether the two are comparable is disputed [61, 153]. Attributing every gain to the model hides system changes, and every model change can break behaviour the harness relied on. Freeze the case set and compare configurations with repeated runs and failure analysis.
+Evaluate the complete configuration: the model, memory, tools and gate, and the harness that runs them. A harness can move a model's score by tens of points: ARC Prize verified one model at 62.7% with its standard harness and up to 99.9% with its maker's adapter, though whether the two are comparable is disputed [61, 153]. Attributing every gain to the model hides system changes, and every model change can break behaviour the harness relied on. Freeze the case set and compare configurations with repeated runs and failure analysis.
 
 - Where it fits: Any component change, or any move to a new environment.
 - Test before committing: Freeze the case set; compare configurations with repeat runs and failure analysis.
@@ -1742,7 +1743,7 @@ Know which models, tools, data flows and owners support each production capabili
 
 #### IR-087 · Evaluation-gated releases and model retirement · Intelligence: Use · Enterprise: Plan for
 
-Treat every model change as a release, with regression tests and an exit path. Nine major model releases arrived between 3 September and 26 October 2026 [15, 68, 69, 122, 123, 128 to 131], and hosted models can be changed or retired; in Brightbeam's experience, notice periods range from about 60 days to 12 months, and providers publish their schedules [188 to 192]. A compatible API can hide materially different behaviour. Keep prompts, harnesses and evaluations under version control, run the regression suite against each successor model, and rehearse the migration before a notice arrives.
+Treat every model change as a release, with regression tests and an exit path. Nine major model releases arrived between 3 September and 26 October 2026 [15, 68, 69, 122, 123, 128 to 131], and hosted models can be changed or retired; in Brightbeam's experience, notice periods range from about 60 days to 12 months, and providers publish their schedules [188 to 192]. A compatible API can hide materially different behaviour. Keep harnesses, with their prompts, and evaluations under version control, run the regression suite against each successor model, and rehearse the migration before a notice arrives.
 
 - Where it fits: Hosted models or dependencies that can change or be retired.
 - Test before committing: Rehearse a migration with realistic notice and an accepted fallback.
@@ -2117,9 +2118,17 @@ Selection. For the themes and the account of the period, the editors asked of ev
 
 Labels. Evidence layers distinguish Measured, Documented, Demonstrated, Reported, Proposed and Opinion. These describe the type of evidence. A measured result may still be vendor-reported, narrowly sampled or unreplicated. Every catalogue entry carries an intelligence label (Use, Trial, Evaluate, Wait or Prepare) and an enterprise label (Revisit, Test, Plan for or Watch). The enterprise judgements on the Enterprise track each carry a condition, the evidence, an action, a trade-off and a trigger to review them.
 
-The catalogue. The research team proposes placements, and anyone can propose an entry or a change through the open contribution process, where the editors and specialist reviewers decide. Practitioners challenge the placements, and specialists check the material claims and labels. Entries that cite Brightbeam's work say so, and an entry that a contributor proposed credits them on its page.
+The catalogue. The editors propose placements, and anyone can propose an entry or a change through the open contribution process, where the editors and specialist reviewers decide. Contributors challenge the placements, and specialist reviewers check the material claims and labels. Entries that cite Brightbeam's work say so, and an entry that a contributor proposed credits them on its page.
 
-Corrections. Corrections will be recorded with their effect on any conclusion.
+Independence. Placements rest on evidence and the editors' judgement.
+
+- The Intelligence Radar accepts no payment for entries or placements and carries no advertising.
+- Evidence from Brightbeam's own practice, research or clients is identified as such and is never the sole basis for a placement.
+- Contributors declare their interests with each contribution.
+- The founding editors work at Brightbeam. Once partner organisations have nominated its members, an Editorial Board takes final authority over placements and begins by reviewing the decisions in which Brightbeam has a commercial interest.
+- Every decision is published with its reasons, and a contributor, partner or organisation named in an entry may appeal a decision within thirty days through the open contribution process.
+
+Corrections. Corrections are made through the open contribution process and recorded with their effect on any conclusion.
 
 ## Sources
 
@@ -2451,3 +2460,4 @@ One register serves all of The Intelligence Radar. Kinds of source and the scope
 318. Databricks, Introducing ai_decide: make fast decisions on your governed data (30 September 2026). https://www.databricks.com/blog/introducing-aidecide-make-fast-decisions-your-governed-data (Organisation publication)
 319. StationX, Jev AI for cybersecurity: we tested it on real work (30 September 2026). https://app.stationx.net/articles/jev-ai-cybersecurity (Organisation publication)
 320. Check Point, A decision model breaks like any other language model: a first look at Jev (24 September 2026). https://blog.checkpoint.com/ai-security/jev-is-not-a-language-model-but-it-breaks-like-one-prompt-injection-against-a-typed-decision-model/ (Organisation publication)
+321. Klein, Calderwood and MacGregor, Critical decision method for eliciting knowledge, IEEE Transactions on Systems, Man, and Cybernetics 19(3), 462 to 472 (1989). DOI 10.1109/21.31053. https://doi.org/10.1109/21.31053 (Academic paper)
