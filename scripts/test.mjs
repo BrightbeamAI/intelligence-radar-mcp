@@ -55,6 +55,8 @@ async function run(label, options) {
   check(t('links show_radar to its view'), show?._meta?.ui?.resourceUri === 'ui://intelligence-radar/radar-view.html', JSON.stringify(show?._meta));
 
   const about = textOf(await client.callTool({ name: 'about_radar', arguments: {} }));
+  check(t('about_radar defines an AI agent and its harness, word for word'), R.terms.terms.every((x) => about.includes(`**${x.term}:** ${x.definition}`))
+    && Object.entries(R.terms.terms[0].components).every(([k, v]) => about.includes(`- **${k}:** ${v}`)));
   check(t('about_radar counts every entry and dimension'), about.includes(`${R.entries.length} capabilities`) && R.dimensions.every((d) => about.includes(d.name)));
 
   const top = async (query, n = 3) => (await client.callTool({ name: 'search_radar', arguments: { query } })).structuredContent.results.slice(0, n).map((r) => r.id);
