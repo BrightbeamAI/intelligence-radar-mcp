@@ -18,11 +18,12 @@ const INSTRUCTIONS = [
   `It holds ${R.entries.length} entries in ${R.dimensions.length} dimensions. Each entry has an intelligence label, for readiness under the conditions it states`,
   `(${TECH.join(', ')}), and an enterprise label, for what an organisation should do now (${ENT.join(', ')}).`,
   'A label holds under the conditions its entry states, so read the entry before applying it to a situation.',
+  'It defines an AI agent and its harness once, and uses both terms in those senses only: about_radar gives the definitions.',
   `Evidence runs to ${ED.evidence_cutoff}.`,
   'Start with search_radar or check_plan; use get_entry for the judgement, the test to run first, the failure to watch for and the sources.',
   ...(sectors.length ? [`For ${sectors.map((x) => x.name.toLowerCase()).join(' or ')}, get_sector gives the sector lens: what binds there, where to start and the entries placed differently;`
     + ' search_radar, check_plan and show_radar take a sector too.'] : []),
-  'When you use the Radar in an answer, name each entry by ID and title (for example IR-028 MCP tool integration), give both labels and link its page.',
+  'When you use The Intelligence Radar in an answer, name each entry by ID and title (for example IR-028 MCP tool integration), give both labels and link its page.',
   'Cite a figure by its source number and link.',
 ].join(' ');
 
@@ -53,12 +54,12 @@ export function createServer(gh = githubSettings()) {
   // ---------------------------------------------------------------- tools
   server.registerTool('about_radar', {
     title: 'About The Intelligence Radar',
-    description: 'What The Intelligence Radar is, this edition, how many entries carry each label, the nine dimensions and how to use this server. Call it first if you have not used the Radar before.',
+    description: 'What The Intelligence Radar is, this edition, how many entries carry each label, the nine dimensions and how to use this server. Call it first if you have not used The Intelligence Radar before.',
     annotations: READ_ONLY,
   }, async () => ({ content: [text(F.aboutMarkdown())] }));
 
   server.registerTool('search_radar', {
-    title: 'Search the Radar',
+    title: 'Search The Intelligence Radar',
     description: 'Find entries by topic, technology, practice or keyword, optionally filtered by dimension, intelligence label or enterprise label. '
       + 'Returns each entry\'s ID, title, dimension, both labels, a one-sentence judgement and its web page. With filters and no query, lists the matching entries in order.',
     inputSchema: z.object({
@@ -129,10 +130,10 @@ export function createServer(gh = githubSettings()) {
   });
 
   server.registerTool('check_plan', {
-    title: 'Check a plan against the Radar',
+    title: 'Check a plan against The Intelligence Radar',
     description: 'Match a plan, roadmap, architecture, policy, business case or list of initiatives against The Intelligence Radar. Returns the entries the text touches, '
       + 'with both labels, the conditions to check, the test to run first and the failure to watch for. Entries at Wait or Prepare are flagged, '
-      + 'because the plan may assume readiness the Radar does not support, and dimensions the text does not touch are listed.',
+      + 'because the plan may assume readiness The Intelligence Radar does not support, and dimensions the text does not touch are listed.',
     inputSchema: z.object({
       text: z.string().min(20).max(60000).describe('The plan, roadmap or document text to check'),
       sector: sectorArg.optional().describe('Read the plan through this sector\'s lens: what binds there and the entries placed differently'),
@@ -148,8 +149,8 @@ export function createServer(gh = githubSettings()) {
     if (sector && !sec) return notFound('sector', sector, `The sector lens covers ${sectors.map((x) => x.name).join(', ') || 'no sector yet'}.`);
     const { matches: found, touched } = checkPlan(plan, limit ?? 10);
     const flag = (e) => (e.intelligence === 'Wait' ? 'Wait: The Intelligence Radar advises deferring this until a named obstacle clears.'
-      : e.intelligence === 'Prepare' ? 'Prepare: the Radar treats this as a prerequisite to build now, not a capability ready to use.'
-        : e.enterprise === 'Watch' ? 'Watch: the Radar advises tracking this without commitment yet.' : null);
+      : e.intelligence === 'Prepare' ? 'Prepare: The Intelligence Radar treats this as a prerequisite to build now, ahead of the capability itself.'
+        : e.enterprise === 'Watch' ? 'Watch: The Intelligence Radar advises tracking this without commitment yet.' : null);
     const untouched = R.dimensions.filter((d) => !touched.has(d.number));
     const o = [found.length ? `The text touches ${found.length} ${found.length === 1 ? 'entry' : 'entries'} of The Intelligence Radar.` : 'The text matches no entry closely.', ''];
     for (const r of found) {
@@ -188,7 +189,7 @@ export function createServer(gh = githubSettings()) {
 
   server.registerTool('get_sources', {
     title: 'Look up sources',
-    description: 'The numbered sources the Radar cites as [n], with title, links, kind and how that kind of source is read.',
+    description: 'The numbered sources The Intelligence Radar cites as [n], with title, links, kind and how that kind of source is read.',
     inputSchema: z.object({ numbers: z.array(z.number().int().min(1)).min(1).max(60).describe('Source numbers, for example [164, 170]') }),
     annotations: READ_ONLY,
   }, async ({ numbers }) => {
@@ -206,7 +207,7 @@ export function createServer(gh = githubSettings()) {
 
   server.registerTool('get_sector', {
     title: 'Read the sector lens',
-    description: 'How the Radar reads for one sector: what binds there (the rules and their dates), the entries to start with, the entries placed '
+    description: 'How The Intelligence Radar reads for one sector: what binds there (the rules and their dates), the entries to start with, the entries placed '
       + 'differently there and why, what to hold back, and the entries that matter most. Without a sector, lists the sectors the lens covers.',
     inputSchema: z.object({ sector: sectorArg.optional() }),
     annotations: READ_ONLY,
@@ -310,7 +311,7 @@ export function createServer(gh = githubSettings()) {
 
   server.registerPrompt('brief_dimension', {
     title: 'Brief a dimension',
-    description: 'A one-page brief on one dimension of the Radar for your leadership team or board.',
+    description: 'A one-page brief on one dimension of The Intelligence Radar for your leadership team or board.',
     argsSchema: z.object({
       dimension: dimensionChoice,
       audience: z.string().optional().describe('Who the brief is for, for example "our board" or "engineering leads"'),
@@ -360,7 +361,7 @@ export function createServer(gh = githubSettings()) {
     const body = e ? F.entryMarkdown(e) : d ? F.dimensionMarkdown(d) : '';
     return { messages: [user((body ? `From ${ED.title}:\n\n${body}\n\n` : `Search ${ED.title} for "${topic}" with search_radar first.\n\n`)
       + 'Write the eight questions a board should ask management about this, in plain language. For each, say what a good answer would include '
-      + 'and which entry of the Radar it draws on (ID and title, with both labels).')] };
+      + 'and which entry of The Intelligence Radar it draws on (ID and title, with both labels).')] };
   });
 
   return server;

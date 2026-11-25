@@ -39,7 +39,7 @@ export function entryMarkdown(e) {
   if (e.sectors.length) o.push(`**Matters most in:** ${e.sectors.join('; ')}`, '');
   const sec = sectorNotesForEntry(e);
   if (sec.length) o.push('## Sector lens', '', ...sec.map((x) => `- ${x}`), '');
-  if (e.disclosure) o.push('Disclosure: this entry cites work published by Brightbeam, which manages the Radar.', '');
+  if (e.disclosure) o.push('Disclosure: this entry cites work published by Brightbeam, which manages The Intelligence Radar.', '');
   if (e.contribution) {
     o.push(`**Community contribution:** ${e.contribution.text}${e.contribution.interests ? ` Declared interests: ${e.contribution.interests}` : ''}`, '');
   }
@@ -86,11 +86,16 @@ export function aboutMarkdown() {
     `${ED.volume}: ${ED.edition_title}. Published by ${ED.publisher}, ${ED.released}. Evidence to ${ED.evidence_cutoff}.`, '',
     `${ED.title} is a community-driven radar for technical leaders. It places ${c.entries} capabilities and practices `
       + `in ${R.dimensions.length} dimensions. Each entry carries an intelligence label, for readiness under the stated conditions, and an `
-      + 'enterprise label, for the action an organisation should take now. It is built with partners and '
-      + 'practitioners and managed by Brightbeam.', '',
+      + 'enterprise label, for the action an organisation should take now. It is open to contributions from anyone and '
+      + 'managed by Brightbeam, its founder.', '',
     '## Entries by label', '',
     '- Intelligence: ' + TECH.map((t) => `${t} ${c.intelligence[t]}`).join(', '),
     '- Enterprise: ' + ENT.map((t) => `${t} ${c.enterprise[t]}`).join(', '), '',
+    ...(R.terms ? ['## Terms', '', 'The Intelligence Radar uses these terms in one sense only.', '',
+      ...R.terms.terms.flatMap((x) => [`**${x.term}:** ${x.definition}`
+        + (x.components ? ` An ${x.term} has ${['no', 'one', 'two', 'three', 'four', 'five', 'six'][Object.keys(x.components).length]} components:` : ''), '',
+        ...(x.components ? [...Object.entries(x.components).map(([k, v]) => `- **${k}:** ${v}`), ''] : [])]),
+      R.terms.divides, ''] : []),
     '## Dimensions', '',
     ...R.dimensions.map((d) => `- ${d.number} **${d.name}** (${d.entries} entries): ${d.question}`), '',
     '## How to use this server', '',
@@ -98,11 +103,11 @@ export function aboutMarkdown() {
     '- `get_dimension` explains a dimension and what its placements imply; `list_judgements` gives the enterprise judgements.',
     '- `check_plan` matches a plan or roadmap to the entries it touches; `show_radar` draws the radar where the host supports it.',
     ...(sectors.length ? [`- \`get_sector\` reads The Intelligence Radar for one sector (${sectors.map((x) => x.name).join(', ')}): what binds there, where to start and the entries placed differently.`] : []),
-    '- When you use the Radar in an answer, name entries by ID and title, give both labels and link the entry page.',
+    '- When you use The Intelligence Radar in an answer, name entries by ID and title, give both labels and link the entry page.',
     '- Anyone can contribute: `how_to_contribute` explains how to propose a review, a correction, evidence, a label change or a new entry; '
       + '`prepare_contribution` checks one against this edition and shows its preview before anything is sent, and `submit_contribution` sends it '
       + 'as a GitHub issue. Specialist reviewers and editors review contributions from here too (`review_queue`, `decide_contribution`).', '',
-    `Website: ${ED.site_url}. Text under ${ED.licence}, with credit to ${ED.title}, Brightbeam. Cite as: ${ED.cite}`,
+    `Website: ${ED.site_url}. Text under ${ED.licence}, with credit to ${ED.title}. Cite as: ${ED.cite}`,
   ];
   return o.join('\n');
 }
