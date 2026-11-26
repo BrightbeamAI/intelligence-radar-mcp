@@ -332,9 +332,11 @@ function communityData() {
   const cat = JSON.parse(readFileSync(path.join(PKG, 'source', 'catalogue.json'), 'utf8'));
   const slug = (n) => n.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
   const secs = JSON.parse(readFileSync(path.join(PKG, 'source', 'sectors.json'), 'utf8')).sectors;
-  check('data: carries the raw dimensions, the sectors by slug, the edition, the forms and the community config without its note',
+  check('data: carries the raw dimensions, the sectors by slug, the edition, the forms (both application forms among them) and the community config without its note',
     cat.dimensions.every((d) => JSON.stringify(C.dimensions[String(d.id)]) === JSON.stringify(d)) && secs.every((s) => JSON.stringify(C.sectors[slug(s.name)]) === JSON.stringify(s))
-    && C.edition === JSON.parse(readFileSync(path.join(PKG, 'source', 'edition.json'), 'utf8')).id && C.config.note === undefined && C.config.kinds && C.forms.forms.length === 6);
+    && C.edition === JSON.parse(readFileSync(path.join(PKG, 'source', 'edition.json'), 'utf8')).id && C.config.note === undefined && C.config.kinds
+    && JSON.stringify(C.forms) === JSON.stringify(JSON.parse(readFileSync(path.join(PKG, 'community', 'forms.json'), 'utf8')))
+    && C.forms.forms.filter((f) => f.kind === null).map((f) => f.file).join() === [C.config.apply_form, C.config.lead_form].join());
 }
 
 // RETIRED with the review desk service (7 November 2026): whoamiDesk, roles and endToEnd below are no longer called.
